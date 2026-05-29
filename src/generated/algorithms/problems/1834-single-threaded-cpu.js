@@ -1,0 +1,26 @@
+export default {
+  "id": 1834,
+  "name": "Single-Threaded CPU",
+  "difficulty": "medium",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/single-threaded-cpu",
+  "relativeDir": "S/Single-Threaded CPU",
+  "slug": "1834-single-threaded-cpu",
+  "availableLanguages": [
+    "cpp",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 60,
+    "python": 24,
+    "javascript": 49
+  },
+  "languages": {
+    "cpp": "class Solution {\r\npublic:\r\n    vector<int> getOrder(vector<vector<int>>& tasks) {\r\n        \r\n        //we use priority queue to get the least processing time from the available server\r\n        //implement a min heap\r\n        \r\n        //dp is double pair\r\n        //sp is single pair\r\n        using dp=pair<long int,pair<long int,long int >> ;\r\n        using sp=pair<long int,long int>;\r\n        priority_queue<sp,vector<sp>,greater<sp>> pq;\r\n        int len=tasks.size(); \r\n        //we can rearrage the tasks but we can't get the index in the original array\r\n        vector<dp> rearrange;\r\n        for(long int  i=0;i<len;i++)\r\n        {\r\n            rearrange.push_back({tasks[i][0],{tasks[i][1],i}});\r\n        }\r\n        \r\n        //rearrange contains the same as tasks but with extra value \"index\" in its original array\r\n\r\n        //sort in the ascending order of  their enqueue time \r\n        //if two tasks have same enqueue time it will sort the one which has the less processing time\r\n        sort(rearrange.begin(),rearrange.end());\r\n        long int i=0;\r\n        long  int finishTime=rearrange[0].first;\r\n        long int k=tasks.size();\r\n\r\n        vector<int> res;\r\n        while(k)\r\n        {\r\n            while(i<len && finishTime>=rearrange[i].first)\r\n            {\r\n                //push the processing time and the index\r\n                pq.push({rearrange[i].second.first,rearrange[i].second.second});\r\n                i++;\r\n            }\r\n            \r\n            //pick the task which is available upto the current finishTime and with the less processing time\r\n            auto [time,ind]=pq.top();\r\n            pq.pop();\r\n            \r\n            //processing the tasks take \"time\"\r\n            finishTime+=time; //the cpu is now idle at the time finishTime\r\n            res.push_back(ind);\r\n            \r\n            //now i points to the next task \r\n            //if there are no tasks left in pq\r\n            // and the next tasks enqueue time is larger than the current finishing time\r\n            //we start with the task enqueue time \r\n            if(pq.empty() && (i<len && finishTime < rearrange[i].first ))\r\n                finishTime=rearrange[i].first;\r\n            \r\n            k--;\r\n        }\r\n        return res;\r\n        \r\n    }\r\n};",
+    "python": "class Solution:\r\n    def getOrder(self, tasks: List[List[int]]) -> List[int]:\r\n        # For better readability\r\n        Task = namedtuple('Task', ['etime', 'ptime', 'index'])\r\n        \r\n        # Sort the tasks by enqueue time, shortest processing time and index\r\n        stasks = sorted([Task(task[0], task[1], i) for i, task in enumerate(tasks)])\r\n        # t: current CPU clock; i: current task index\r\n        t = i = 0\r\n        heap, result = [], []\r\n        \r\n        while len(result) < len(stasks):\r\n            # Push all the tasks available at current CPU clock\r\n            while i < len(stasks) and stasks[i].etime <= t:\r\n                heappush(heap, (stasks[i].ptime, stasks[i].index))\r\n                i += 1\r\n            if heap:\r\n                ptime, index = heappop(heap)\r\n                result.append(index)\r\n                t += ptime\r\n            else:\r\n                # Jump to the next available task\r\n                t = stasks[i].etime\r\n        return result",
+    "javascript": "// Runtime: 7002 ms (Top 5.13%) | Memory: 106.5 MB (Top 58.97%)\r\nvar getOrder = function(tasks) {\r\n    var n = tasks.length;\r\n    tasks = tasks.map((t,i)=>[...t, i]);\r\n    tasks.sort((a,b)=>{\r\n        if(a[0]===b[0])\r\n        {\r\n            return a[2]-b[2];\r\n        }\r\n        return a[0]-b[0];\r\n    }); // sort by queue time\r\n    var q = [];\r\n    var time=tasks[0][0];\r\n    var ans = [];\r\n    var enqIndex = 0;\r\n    while(ans.length < n)\r\n    {\r\n        if(q.length===0 && time < tasks[enqIndex][0])\r\n        {\r\n            time = tasks[enqIndex][0];\r\n        }\r\n        // enqueue\r\n        var curSize = q.length;\r\n        while(enqIndex<tasks.length && tasks[enqIndex][0]<=time)\r\n        {\r\n            q.push(tasks[enqIndex]);\r\n            enqIndex++;\r\n        }\r\n        // sort when needed\r\n        if(curSize < q.length) // hack way to fix TLE to mock PQ\r\n        {\r\n            if(q.length>0)\r\n            {\r\n                q.sort((a,b)=>{\r\n                    if(a[1] === b[1])\r\n                    {\r\n                        return a[2]-b[2];\r\n                    }\r\n                    return a[1]-b[1];\r\n                });\r\n            }\r\n        }\r\n        // execute first task\r\n        var t = q.shift();\r\n        ans.push(t[2]);\r\n        time += t[1];\r\n    }\r\n    return ans;\r\n};"
+  }
+}

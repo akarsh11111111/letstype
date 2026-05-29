@@ -1,0 +1,29 @@
+export default {
+  "id": 931,
+  "name": "Minimum Falling Path Sum",
+  "difficulty": "medium",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/minimum-falling-path-sum",
+  "relativeDir": "M/Minimum Falling Path Sum",
+  "slug": "0931-minimum-falling-path-sum",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 67,
+    "java": 40,
+    "python": 12,
+    "javascript": 29
+  },
+  "languages": {
+    "cpp": "class Solution {\r\npublic:\r\n    \r\n    int check( int i , int j , int n  ){\r\n        if( i <0  || j<0 || i>=n || j>=n )\r\n            return 0;\r\n        return 1;\r\n    }\r\n    \r\n    int solve(vector<vector<int>>&mat , int i , int j  , int n , vector<vector<int>>&dp ){\r\n        \r\n        if(not check( i , j , n ))\r\n            return 999999;\r\n        \r\n        if(i == n-1 && j < n  )return mat[i][j];\r\n        \r\n        if(dp[i][j]!= -1 )\r\n            return dp[i][j];\r\n        \r\n        \r\n        int op_1 = mat[i][j] + solve(mat , i+1,  j - 1 , n , dp );\r\n        int op_2 = mat[i][j] + solve(mat , i+1 , j  ,    n , dp );\r\n        int op_3 = mat[i][j] + solve(mat , i+1 , j + 1 , n , dp );\r\n        \r\n        \r\n        return dp[i][j] =  min( {op_1 , op_2 , op_3} );\r\n        \r\n        \r\n    }\r\n    \r\n    int minFallingPathSum(vector<vector<int>>& matrix) {\r\n        int n = matrix[0].size();\r\n        \r\n//         vector<vector<int>>dp(n+1 , vector<int>(n +1 , -1 ));\r\n//         int ans =  INT_MAX;\r\n//         for(int i = 0  ; i<n ; ++i )\r\n//             ans = min( ans , solve( matrix , 0, i , n , dp ));\r\n        \r\n        \r\n        \r\n        vector<vector<int>>dp(n , vector<int>(n, 0));\r\n        for( int i =0  ; i<n ; ++i )\r\n            dp[0][i] = matrix[0][i];\r\n        \r\n        \r\n        for( int i =1 ; i<n ; ++i ){\r\n            for( int j = 0  ; j<n ; ++j ){\r\n                \r\n                if(j-1>=0 && j+1 < n )\r\n                    dp[i][j] = matrix[i][j] + min( {dp[i-1][j-1] ,  dp[i-1][j] , dp[i-1][j+1] });\r\n                else if(j == 0 )\r\n                     dp[i][j] = matrix[i][j] + min( { dp[i-1][j] , dp[i-1][j+1] });\r\n                else if(j == n-1 )\r\n                     dp[i][j] = matrix[i][j] + min( {dp[i-1][j-1] ,  dp[i-1][j] });\r\n            }\r\n        }\r\n        \r\n        int ans = INT_MAX;\r\n        for( int i = 0  ; i<n ; ++i )\r\n            ans = min( ans , dp[n-1][i]);\r\n        \r\n        \r\n        \r\n        \r\n        return ans ;\r\n    }\r\n};",
+    "python": "class Solution:\r\n    def minFallingPathSum(self, matrix: List[List[int]]) -> int:\r\n        for row in range(1, len(matrix)):\r\n            for col in range(0, len(matrix[row])):\r\n                if col == 0:\r\n                    matrix[row][col] += min(matrix[row-1][col+1], matrix[row-1][col])\r\n                elif col == len(matrix[row]) - 1:\r\n                    matrix[row][col] += min(matrix[row-1][col-1], matrix[row-1][col])\r\n                else:\r\n                    matrix[row][col] += min(matrix[row-1][col-1], matrix[row-1][col], matrix[row-1][col+1])\r\n                \r\n        return min(matrix[-1])",
+    "java": "// Runtime: 3 ms (Top 82.59%) | Memory: 46.9 MB (Top 82.02%)\r\n\r\nclass Solution {\r\n    public int min(int[][] matrix, int[][]dp, int i, int j)\r\n    {\r\n        int a,b,c;\r\n        if(i==0)\r\n            return matrix[i][j];\r\n        if(dp[i][j] != Integer.MAX_VALUE)\r\n            return dp[i][j];\r\n        if(j==0)\r\n        {\r\n            dp[i][j] = Math.min(min(matrix, dp, i-1,j),min(matrix, dp, i-1, j+1))+matrix[i][j];\r\n        }\r\n        else if(j==matrix.length -1)\r\n        {\r\n            dp[i][j] = Math.min(min(matrix, dp, i-1,j),min(matrix, dp, i-1, j-1))+matrix[i][j];\r\n        }\r\n        else\r\n        {\r\n            dp[i][j] = Math.min(Math.min(min(matrix, dp, i-1,j),min(matrix, dp, i-1, j+1)),min(matrix, dp, i-1, j-1))+matrix[i][j];\r\n        }\r\n        return dp[i][j];\r\n    }\r\n\r\n    public int minFallingPathSum(int[][] matrix) {\r\n        int dp[][] = new int[matrix.length][matrix.length];\r\n        if(matrix.length == 1)\r\n            return matrix[0][0];\r\n        for(int i=0;i<matrix.length;i++)\r\n            for(int j=0;j<matrix.length;j++)\r\n                dp[i][j] = Integer.MAX_VALUE;\r\n        int min=Integer.MAX_VALUE;\r\n        for(int i=0;i<matrix.length; i++)\r\n        {\r\n            min = Math.min(min, min(matrix, dp, matrix.length-1,i));\r\n        }\r\n        return min;\r\n    }\r\n}",
+    "javascript": "// Runtime: 74 ms (Top 20.39%) | Memory: 44.70 MB (Top 31.58%)\r\n\r\nvar minFallingPathSum = function(matrix) {\r\n    let n = matrix.length;\r\n    let m = matrix[0].length;\r\n    let dp = new Array(n).fill(0).map(() => new Array(m).fill(0));\r\n    \r\n    // tabulation // bottom-up approach\r\n    \r\n    // base case - when i will be 0, dp[0][j] will be matrix[0][j]\r\n    for(let j = 0; j < m; j++) dp[0][j] = matrix[0][j]\r\n    \r\n    for(let i = 1; i < n; i++) {\r\n        for(let j = 0 ; j < m; j++) {\r\n            let up = matrix[i][j] + dp[i - 1][j];\r\n            \r\n            let upLeft = matrix[i][j];\r\n            if((j - 1) >= 0) upLeft += dp[i - 1][j - 1]; // if not out of bound\r\n            else upLeft += 10000; // big enough number\r\n            \r\n            let upRight = matrix[i][j];\r\n            if((j + 1) < m) upRight += dp[i - 1][j + 1]; // if not out of bound\r\n            else upRight += 10000; // big enough number\r\n            \r\n            dp[i][j] = Math.min(up, upLeft, upRight);\r\n        }\r\n    }\r\n    return Math.min(...dp[n - 1]);\r\n};"
+  }
+}

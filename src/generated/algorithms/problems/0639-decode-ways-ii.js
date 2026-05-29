@@ -1,0 +1,29 @@
+export default {
+  "id": 639,
+  "name": "Decode Ways II",
+  "difficulty": "hard",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/decode-ways-ii",
+  "relativeDir": "D/Decode Ways II",
+  "slug": "0639-decode-ways-ii",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 69,
+    "java": 28,
+    "python": 18,
+    "javascript": 30
+  },
+  "languages": {
+    "cpp": "// Runtime: 36 ms (Top 69.86%) | Memory: 13.40 MB (Top 75.51%)\r\n\r\n#define ll long long\r\nclass Solution {\r\npublic:\r\n    \r\n    ll numDecodings(string s) {\r\n        \r\n        ll M = 1000000007;\r\n        ll dp[s.size() + 1];\r\n        memset(dp, 0, sizeof(dp));\r\n        \r\n        dp[0] = 1;\r\n        \r\n        for(int i = 1; i <= s.size(); i++){\r\n            if(s[i - 1] == '*' and i == 1)\r\n                dp[i] = 9;\r\n            else if(s[i - 1] == '0' and i == 1)\r\n                dp[i] = 0;\r\n            else if(i == 1)\r\n                dp[i] = 1;\r\n            else{\r\n                //now we need to check previous 2 characters for *,digit combination\r\n                if(s[i - 1] == '*')\r\n                    dp[i] += (9 * dp[i - 1]) % M;\r\n                else{\r\n                    if(s[i - 1] == '0')//since previous zero combination not possible according to question no partition can take place with a previous character 0\r\n                        dp[i] = 0;\r\n                    else\r\n                        dp[i] += dp[i - 1] % M;\r\n                } \r\n                \r\n                //for(int i = 0; i <= s.size(); i++)\r\n                    //cout << dp[i] << \" \";\r\n                //cout << \"\\n\";\r\n                \r\n                if(s[i - 2] == '*'){\r\n                    if(s[i - 1] == '*')\r\n                        dp[i] += (15 * dp[i - 2]) % M;\r\n                    else if(s[i - 1] > '6') // only 1 way\r\n                        dp[i] += dp[i - 2] % M;\r\n                    else\r\n                        dp[i] += (2 * dp[i - 2]) % M;\r\n                        \r\n                }\r\n                else if(s[i - 2] == '1'){\r\n                    if(s[i - 1] == '*'){\r\n                        dp[i] += (9 * dp[i - 2]) % M;\r\n                    }\r\n                    else\r\n                        dp[i] += dp[i - 2] % M;\r\n                    \r\n                }\r\n                else if(s[i - 2] == '2'){\r\n                    if(s[i - 1] == '*')\r\n                        dp[i] += (6 * dp[i - 2]) % M;\r\n                    else if(s[i - 1] <= '6')\r\n                        dp[i] += dp[i - 2] % M;\r\n                }\r\n            }\r\n        }\r\n        \r\n        //for(int i = 0; i <= s.size(); i++)\r\n            //cout << dp[i] << \" \";\r\n        //cout << \"\\n\";\r\n        \r\n        return dp[s.size()] % M;\r\n    }\r\n};",
+    "python": "# Runtime: 180 ms (Top 97.4%) | Memory: 21.20 MB (Top 53.7%)\r\n\r\nclass Solution:\r\n    def numDecodings(self, s: str):\r\n        if s[0] == '0': return 0\r\n        cMap = {'0':0, '*': 9, '**': 15, '1*': 9, '2*': 6} #{char(s) : multiplier} mapping\r\n        for i in range(1, 27): cMap[str(i)] = 1\r\n        for i in range(0, 7): cMap['*'+str(i)] = 2\r\n        for i in range(7, 10): cMap['*'+str(i)] = 1\r\n        \r\n        dp = [0]*(len(s)+1)\r\n        dp[0], dp[-1] = cMap[s[0]] , 1\r\n        \r\n        for i in range(1, len(s)):\r\n            dp[i] += (cMap[s[i]]*dp[i-1] + cMap.get(s[i-1:i+1],0)*dp[i-2])%(10**9 + 7)\r\n            if not dp[i]: return 0\r\n            \r\n        return dp[-2]",
+    "java": "// Runtime: 1171 ms (Top 5.16%) | Memory: 49 MB (Top 90.58%)\r\nclass Solution {\r\n    public int numDecodings(String s) {\r\n        int[] dp = new int[s.length()+1];\r\n        dp[0]=1;\r\n        int M = (int)1e9+7;\r\n        for (int i = 1; i <= s.length(); i++){\r\n            for (int j = 1; j <= 26; j++){\r\n                if (j<10 && (s.charAt(i-1)-'0'==j||s.charAt(i-1)=='*')){ // 1 digit -> if they are equal or if *\r\n                    dp[i]+=dp[i-1];\r\n                    dp[i]%=M;\r\n                }\r\n                if (i>1&&j>=10&&ok(j,s.substring(i-2,i))){ // ok() function handles 2 digits\r\n                    dp[i]+=dp[i-2];\r\n                    dp[i]%=M;\r\n                }\r\n            }\r\n        }\r\n        return dp[s.length()];\r\n    }\r\n\r\n    private boolean ok(int val, String s){ // TRUE if the value s represents can equal to val.\r\n        return (s.equals(\"**\") && val%10 > 0\r\n             || s.charAt(0)=='*' && val%10==s.charAt(1)-'0'\r\n             || s.charAt(1)=='*' && val/10==s.charAt(0)-'0' && val % 10 > 0\r\n             || !s.contains(\"*\") && Integer.parseInt(s)==val);\r\n    }\r\n}",
+    "javascript": "var numDecodings = function(s) {\r\n    let len = s.length;\r\n    if(len === 0) return s;\r\n    let mod = Math.pow(10,9)+7;\r\n    let dp = new Array(len+1).fill(0);\r\n    dp[0] = 1;\r\n    if(s[0] == 0) dp[1] = 0;\r\n    else if(s[0] == '*') dp[1] = 9;\r\n    else dp[1] = 1;\r\n    for(let i=2;i<=len;i++){\r\n        if(s[i-1] == '*'){\r\n            dp[i] += 9*dp[i-1];\r\n        } else if(s[i-1] != 0 && s[i-1] != '*'){\r\n            dp[i] += dp[i-1]; \r\n        }\r\n        if(s[i-2] == 1){\r\n            if(s[i-1] == '*') dp[i] += 9*dp[i-2];\r\n            else dp[i] += dp[i-2];\r\n        } else if(s[i-2] == 2){\r\n            if(s[i-1]<7) dp[i] += dp[i-2];\r\n            else if(s[i-1] == '*') dp[i] += 6*dp[i-2];            \r\n        } else if(s[i-2] == '*'){\r\n            if(s[i-1] == '*') dp[i] += 15*dp[i-2];\r\n            else if(s[i-1]>=0 && s[i-1]<=6) dp[i] += 2*dp[i-2];\r\n            else if(s[i-1] >=7) dp[i] += dp[i-2];\r\n        }\r\n        dp[i] = dp[i]%mod;\r\n    }\r\n    return dp[len]%mod;\r\n};"
+  }
+}

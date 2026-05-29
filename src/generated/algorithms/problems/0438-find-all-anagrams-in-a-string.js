@@ -1,0 +1,29 @@
+export default {
+  "id": 438,
+  "name": "Find All Anagrams in a String",
+  "difficulty": "medium",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/find-all-anagrams-in-a-string",
+  "relativeDir": "F/Find All Anagrams in a String",
+  "slug": "0438-find-all-anagrams-in-a-string",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 37,
+    "java": 45,
+    "python": 24,
+    "javascript": 42
+  },
+  "languages": {
+    "cpp": "// Runtime: 19 ms (Top 36.26%) | Memory: 9.10 MB (Top 61.21%)\r\n\r\nclass Solution {\r\npublic:\r\n    vector<int> findAnagrams(string s, string p) {\r\n        vector<int> pv(26,0), sv(26,0), res;\r\n        if(s.size() < p.size())\r\n           return res;\r\n        // fill pv, vector of counters for pattern string and sv, vector of counters for the sliding window\r\n        for(int i = 0; i < p.size(); ++i)\r\n        {\r\n            ++pv[p[i]-'a'];\r\n            ++sv[s[i]-'a'];\r\n        }\r\n        if(pv == sv)\r\n           res.push_back(0);\r\n\r\n        //here window is moving from left to right across the string. \r\n        //window size is p.size(), so s.size()-p.size() moves are made \r\n        for(int i = p.size(); i < s.size(); ++i) \r\n        {\r\n             // window extends one step to the right. counter for s[i] is incremented \r\n            ++sv[s[i]-'a'];\r\n            \r\n            // since we added one element to the right, \r\n            // one element to the left should be discarded. \r\n            //counter for s[i-p.size()] is decremented\r\n            --sv[s[i-p.size()]-'a']; \r\n\r\n            // if after move to the right the anagram can be composed, \r\n            // add new position of window's left point to the result \r\n            if(pv == sv)  // this comparison takes O(26), i.e O(1), since both vectors are of fixed size 26. Total complexity O(n)*O(1) = O(n)\r\n               res.push_back(i-p.size()+1);\r\n        }\r\n        return res;\r\n    }\r\n};",
+    "python": "from collections import Counter\r\nclass Solution:\r\n    def findAnagrams(self, s: str, p: str) -> List[int]:\r\n        l='abcdefghijklmnopqrstuvwxyz'\r\n        if len(p)>len(s):\r\n            return []\r\n        d={}\r\n        for x in l:\r\n            d[x]=0\r\n        d1=dict(d)\r\n        d2=dict(d)\r\n        for x in range(len(p)):\r\n            d1[s[x]]+=1\r\n            d2[p[x]]+=1\r\n        l1=[]\r\n        if d1==d2:\r\n            l1=[0]\r\n        #print(d1)\r\n        for x in range(len(p),len(s)):\r\n            d1[s[x]]+=1\r\n            d1[s[x-len(p)]]-=1\r\n            if d1==d2:\r\n                l1.append(x-len(p)+1)\r\n        return l1",
+    "java": "class Solution { \r\n    \r\n    public List<Integer> findAnagrams(String s, String p) {\r\n        int fullMatchCount = p.length();\r\n        Map<Character, Integer> anagramMap = new HashMap<>();\r\n        \r\n        for (Character c : p.toCharArray())\r\n            anagramMap.put(c, anagramMap.getOrDefault(c, 0) + 1);\r\n        \r\n        List<Integer> result = new ArrayList<>();\r\n        int left = 0, right = 0, currentMatchCount = 0;\r\n        Map<Character, Integer> currentAnagramMap = new HashMap<>();\r\n        while (right < s.length()) {\r\n            char c = s.charAt(right);\r\n            if (anagramMap.get(c) == null) {\r\n                currentAnagramMap = new HashMap<>();\r\n                right++;\r\n                left = right;\r\n                currentMatchCount = 0;\r\n                continue;\r\n            }\r\n            currentAnagramMap.put(c, currentAnagramMap.getOrDefault(c, 0) + 1);\r\n            currentMatchCount++;\r\n            \r\n            if (currentAnagramMap.get(c) > anagramMap.get(c)) {\r\n                char leftC = s.charAt(left);\r\n                while (leftC != c) {\r\n                    currentAnagramMap.put(leftC, currentAnagramMap.get(leftC) - 1);\r\n                    left++;\r\n                    leftC = s.charAt(left);\r\n                    currentMatchCount--;\r\n                }\r\n                left++;\r\n                currentAnagramMap.put(c, currentAnagramMap.get(c) - 1);\r\n                currentMatchCount--;\r\n            }\r\n            \r\n            if (currentMatchCount == fullMatchCount)\r\n                result.add(left);\r\n            \r\n            right++;\r\n        }\r\n        return result;\r\n    }\r\n}",
+    "javascript": "// Runtime: 234 ms (Top 41.24%) | Memory: 51.4 MB (Top 8.73%)\r\nvar findAnagrams = function(s, p) {\r\n\r\n    function compareMaps(map1, map2) {\r\n    var testVal;\r\n    if (map1.size !== map2.size) {\r\n        return false;\r\n    }\r\n    for (var [key, val] of map1) {\r\n        testVal = map2.get(key);\r\n        // in cases of an undefined value, make sure the key\r\n        // actually exists on the object so there are no false positives\r\n        if (testVal !== val || (testVal === undefined && !map2.has(key))) {\r\n            return false;\r\n        }\r\n    }\r\n    return true;\r\n    }\r\n\r\n    let p_map=new Map()\r\n    let s_map=new Map()\r\n    let res=[]\r\n    let pn=p.length\r\n    let sn=s.length\r\n    for(let i in p){\r\n        p_map.set(p[i],p_map.get(p[i])?p_map.get(p[i])+1:1)\r\n        s_map.set(s[i],s_map.get(s[i])?s_map.get(s[i])+1:1)\r\n    }\r\n    let l=0\r\n    if(compareMaps(s_map,p_map)) res.push(l)\r\n    for(let r=pn;r<sn;r++){\r\n        s_map.set(s[r],s_map.get(s[r])?s_map.get(s[r])+1:1)\r\n        s_map.set(s[l],s_map.get(s[l])-1)\r\n        if(s_map.get(s[l])===0){\r\n            s_map.delete(s[l])\r\n        }\r\n        if(compareMaps(s_map,p_map)) res.push(l+1)\r\n        l++\r\n    }\r\n    return(res)\r\n\r\n};"
+  }
+}

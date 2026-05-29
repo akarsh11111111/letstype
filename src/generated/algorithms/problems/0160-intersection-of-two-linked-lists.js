@@ -1,0 +1,29 @@
+export default {
+  "id": 160,
+  "name": "Intersection of Two Linked Lists",
+  "difficulty": "easy",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/intersection-of-two-linked-lists",
+  "relativeDir": "I/Intersection of Two Linked Lists",
+  "slug": "0160-intersection-of-two-linked-lists",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 92,
+    "java": 30,
+    "python": 33,
+    "javascript": 26
+  },
+  "languages": {
+    "cpp": "// Runtime: 101 ms (Top 23.35%) | Memory: 14.3 MB (Top 98.77%)\r\n/**\r\n * Definition for singly-linked list.\r\n * struct ListNode {\r\n * int val;\r\n * ListNode *next;\r\n * ListNode(int x) : val(x), next(NULL) {}\r\n * };\r\n */\r\nclass Solution {\r\npublic:\r\n\r\n    //function to get length of linked list\r\n    int getLength(ListNode *head)\r\n    {\r\n        //initial length 0\r\n        int l = 0;\r\n\r\n        while(head != NULL)\r\n        {\r\n            l++;\r\n            head = head->next;\r\n        }\r\n        return l;\r\n    }\r\n\r\n    ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {\r\n\r\n        //ptr1 & ptr2 will move to check nodes are intersecting or not\r\n        //ptr1 will point to the list which have higher length, higher elements (big list)\r\n        //ptr2 will point to small list\r\n        ListNode *ptr1,*ptr2;\r\n\r\n        //fetching length of both the list,as we want a node that both ptr points simultaneously\r\n        //so if both list have same length of nodes, they travel with same speed, they intersect\r\n        //if diff legths, it'll be difficult for us to catch\r\n        //so by substracting list with higher length with lower length\r\n        //we get same level of length, from which both ptr start travaeling, they may get intersect\r\n        int length1 = getLength(headA);\r\n        int length2 = getLength(headB);\r\n\r\n        int diff = 0;\r\n\r\n        //ptr1 points to longer list\r\n        if(length1>length2)\r\n        {\r\n            diff = length1-length2;\r\n            ptr1 = headA;\r\n            ptr2 = headB;\r\n\r\n        }\r\n        else\r\n        {\r\n            diff = length2 - length1;\r\n            ptr1 = headB;\r\n            ptr2 = headA;\r\n        }\r\n\r\n        //till diff is zero and we reach our desired posn\r\n        while(diff)\r\n        {\r\n            //incrementing ptr1 so that it can be at a place where both list have same length\r\n\r\n            ptr1 = ptr1->next;\r\n\r\n            if(ptr1 == NULL)\r\n            {\r\n                return NULL;\r\n            }\r\n\r\n            diff--;\r\n        }\r\n\r\n        //traverse both pointers together, till any of them gets null\r\n        while((ptr1 != NULL) && (ptr2 != NULL))\r\n        {\r\n            //at any point, both point to same node return it\r\n            if(ptr1 == ptr2)\r\n            {\r\n                return ptr1;\r\n            }\r\n\r\n            //increment both pointers, till they both be NULL\r\n            ptr1 = ptr1->next;\r\n            ptr2 = ptr2->next;\r\n        }\r\n\r\n        //if not found any intersaction, return null\r\n        return NULL;\r\n\r\n     }\r\n};",
+    "python": "class Solution:\r\n    def getIntersectionNode(self, headA: ListNode, headB: ListNode) -> Optional[ListNode]:\r\n        m = 0\r\n        n = 0\r\n        temp = headA\r\n        while temp != None:\r\n            m+=1\r\n            temp = temp.next\r\n        temp = headB\r\n        while temp != None:\r\n            n+=1\r\n            temp = temp.next\r\n        diff = 0\r\n        if m>=n : \r\n            diff = m-n\r\n        else:\r\n            diff = n-m\r\n        p1 = headA\r\n        p2 = headB\r\n        if max(m,n) == m:\r\n            while diff > 0:\r\n                p1 = p1.next\r\n                diff-=1\r\n        else:\r\n            while diff > 0:\r\n                p2 = p2.next\r\n                diff-=1\r\n        while p1 != None and p2!=None:\r\n            if p1 == p2:\r\n                return p1\r\n            p1 = p1.next\r\n            p2 = p2.next\r\n        return None",
+    "java": "// Runtime: 1 ms (Top 99.75%) | Memory: 55.6 MB (Top 36.20%)\r\npublic class Solution {\r\n    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {\r\n        ListNode tempA = headA, tempB = headB;\r\n        int lenA = 0, lenB = 0;\r\n        while (tempA != null) {\r\n            lenA++;\r\n            tempA = tempA.next;\r\n        }\r\n        while (tempB != null) {\r\n            lenB++;\r\n            tempB = tempB.next;\r\n        }\r\n        tempA = headA; tempB = headB;\r\n        if (lenB > lenA) {\r\n            for (int i = 0; i < lenB - lenA; i++) {\r\n                tempB = tempB.next;\r\n            }\r\n        } else if (lenA > lenB) {\r\n            for (int i = 0; i < lenA - lenB; i++) {\r\n                tempA = tempA.next;\r\n            }\r\n        }\r\n        while (tempA != null && tempA != tempB) {\r\n            tempA = tempA.next;\r\n            tempB = tempB.next;\r\n        }\r\n        return tempA;\r\n    }\r\n}",
+    "javascript": "// Runtime: 134 ms (Top 54.42%) | Memory: 52.1 MB (Top 6.15%)\r\n\r\nvar getIntersectionNode = function(headA, headB) {\r\n   let node1 = headA;\r\n   let node2 = headB;\r\n\r\n    const set = new Set()\r\n\r\n    while(node1 !== undefined || node2!== undefined){\r\n        if(node1 && set.has(node1)){\r\n            return node1\r\n        }\r\n        if(node2 && set.has(node2)){\r\n            return node2\r\n        }\r\n        if(node1){\r\n            set.add(node1)\r\n            node1 = node1.next;\r\n        }\r\n        else if(node2){\r\n            set.add(node2)\r\n            node2 = node2.next;\r\n        }\r\n        else {return}\r\n    }\r\n };"
+  }
+}

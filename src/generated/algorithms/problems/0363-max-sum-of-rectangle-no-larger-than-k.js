@@ -1,0 +1,29 @@
+export default {
+  "id": 363,
+  "name": "Max Sum of Rectangle No Larger Than K",
+  "difficulty": "hard",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/max-sum-of-rectangle-no-larger-than-k",
+  "relativeDir": "M/Max Sum of Rectangle No Larger Than K",
+  "slug": "0363-max-sum-of-rectangle-no-larger-than-k",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 85,
+    "java": 32,
+    "python": 26,
+    "javascript": 32
+  },
+  "languages": {
+    "cpp": "// Runtime: 1989 ms (Top 31.75%) | Memory: 238.4 MB (Top 54.28%)\r\nclass Solution {\r\npublic:\r\n\r\n    // function for finding maximum subarray having sum less than k\r\n\r\n    int find_max(vector<int>& arr, int k)\r\n    {\r\n        int n = arr.size();\r\n\r\n        int maxi = INT_MIN;\r\n\r\n        // curr_sum will store cumulative sum\r\n\r\n        int curr_sum = 0;\r\n\r\n        // set will store the prefix sum of array\r\n\r\n        set<int> s;\r\n\r\n        // put 0 into set, if curr_sum == k, (curr_sum - k) will be zero\r\n\r\n        s.insert(0);\r\n\r\n        for(int i = 0; i < n; i++)\r\n        {\r\n            // calculate cumulative sum\r\n\r\n            curr_sum += arr[i];\r\n\r\n            // find the prefix sum in set having sum == curr_sum - k\r\n\r\n            auto it = s.lower_bound(curr_sum - k);\r\n\r\n            // if prefix sum is present, update the maxi\r\n\r\n            if(it != s.end())\r\n            {\r\n                maxi = max(maxi, curr_sum - *it);\r\n            }\r\n\r\n            // insert prefix sum into set\r\n\r\n            s.insert(curr_sum);\r\n        }\r\n\r\n        return maxi;\r\n    }\r\n\r\n    int maxSumSubmatrix(vector<vector<int>>& matrix, int k) {\r\n\r\n        int n = matrix.size();\r\n\r\n        int m = matrix[0].size();\r\n\r\n        int maxi = INT_MIN;\r\n\r\n        // fix the position two two rows and take cumulative sum of columns between two fixed rows\r\n\r\n        for(int start_row = 0; start_row < n; start_row++)\r\n        {\r\n            vector<int> col_array(m, 0);\r\n\r\n            for(int end_row = start_row; end_row < n; end_row++)\r\n            {\r\n                // take cumulative sum of columns between two fixed rows\r\n\r\n                for(int col = 0; col < m; col++)\r\n                {\r\n                    col_array[col] += matrix[end_row][col];\r\n                }\r\n\r\n                // find maximum subarray having sum less than equal to k\r\n\r\n                int curr_max = find_max(col_array, k);\r\n\r\n                // update the maximum sum\r\n\r\n                maxi = max(maxi, curr_max);\r\n            }\r\n        }\r\n\r\n        return maxi;\r\n    }\r\n};",
+    "python": "class Solution:\r\n    def maxSumSubmatrix(self, matrix: List[List[int]], k: int) -> int:\r\n        import numpy as np\r\n        \r\n        matrix = np.array(matrix, dtype=np.int32)\r\n        \r\n        M,N = matrix.shape\r\n        \r\n        ret = float(\"-inf\")\r\n        \r\n        CUM = np.zeros((M,N), dtype=np.int32)\r\n        for shift_r in range(M):\r\n            CUM[:M-shift_r] += matrix[shift_r:]\r\n            \r\n            _CUM = np.zeros((M-shift_r,N), dtype=np.int32)\r\n            for shift_c in range(N):\r\n                _CUM[:, :N-shift_c] += CUM[:M-shift_r,shift_c:]\r\n                tmp = _CUM[(_CUM<=k) & (_CUM>ret)]\r\n                if tmp.size:\r\n                    ret = tmp.max()\r\n            if ret == k:\r\n                return ret\r\n        \r\n        return ret\r\n\r\n'''",
+    "java": "// Runtime: 388 ms (Top 6.05%) | Memory: 45.20 MB (Top 6.85%)\r\n\r\nclass Solution {\r\n    public int maxSumSubmatrix(int[][] matrix, int tar) {\r\n        int n=matrix.length,m=matrix[0].length,i,j,k,l,dp[][] = new int[n][m],val,max=Integer.MIN_VALUE,target=tar;\r\n        for(i=0;i<n;i++){\r\n            for(j=0;j<m;j++){\r\n                dp[i][j]=matrix[i][j];\r\n                if(j>0) dp[i][j]+=dp[i][j-1];\r\n            }\r\n        }\r\n        for(i=0;i<n;i++){\r\n            for(j=0;j<m;j++){\r\n                if(i>0) dp[i][j]+=dp[i-1][j];\r\n            }\r\n        }\r\n        for(i=0;i<n;i++){\r\n            for(j=0;j<m;j++){\r\n                for(k=i;k<n;k++){\r\n                    for(l=j;l<m;l++){\r\n                        val=dp[k][l];\r\n                        if((i-1)>=0 && (j-1)>=0) val += dp[i-1][j-1];\r\n                        if((i-1)>=0) val=val-dp[i-1][l];\r\n                        if((j-1)>=0) val=val-dp[k][j-1];\r\n                        if(val>max && val<=target) max=val;\r\n                    }\r\n                }\r\n            }\r\n        }\r\n        return max;\r\n    }\r\n}",
+    "javascript": "// Runtime: 1009 ms (Top 33.33%) | Memory: 44.6 MB (Top 55.56%)\r\n/**\r\n * @param {number[][]} matrix\r\n * @param {number} k\r\n * @return {number}\r\n */\r\nvar maxSumSubmatrix = function(matrix, k) {\r\n    if (!matrix.length) return 0;\r\n\r\n    let n = matrix.length, m = matrix[0].length;\r\n    let sum = new Array(n + 1).fill(0).map(a => new Array(m + 1).fill(0));\r\n    let ans = -Infinity;\r\n\r\n    for (let i = 1; i <= n; i++) {\r\n        for (let j = 1; j <= m; j++) {\r\n            sum[i][j] = matrix[i-1][j-1] + sum[i-1][j] + sum[i][j-1] - sum[i-1][j-1];\r\n            for(let x = 1; x <= i; ++x) {\r\n                for(let y = 1; y <= j; ++y) {\r\n                    let s = rangeSum(sum, x, y, i, j);\r\n                    if (s <= k) {\r\n                        ans = Math.max(s, ans);\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n    return ans;\r\n}\r\n\r\nconst rangeSum = (sum, x1, y1, x2, y2) => {\r\n    return sum[x2][y2] - sum[x1-1][y2] - sum[x2][y1-1] + sum[x1-1][y1-1];\r\n}"
+  }
+}

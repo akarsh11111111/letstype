@@ -1,0 +1,29 @@
+export default {
+  "id": 218,
+  "name": "The Skyline Problem",
+  "difficulty": "hard",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/the-skyline-problem",
+  "relativeDir": "T/The Skyline Problem",
+  "slug": "0218-the-skyline-problem",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 28,
+    "java": 58,
+    "python": 41,
+    "javascript": 31
+  },
+  "languages": {
+    "cpp": "// Runtime: 23 ms (Top 78.66%) | Memory: 14.70 MB (Top 80.04%)\r\n\r\nclass Solution {\r\npublic:\r\n    vector<vector<int>> getSkyline(vector<vector<int>>& buildings) {\r\n        priority_queue<pair<int, int>> pq;\r\n        vector<int> co;\r\n        for (auto b:buildings) {\r\n            co.push_back(b[0]);\r\n            co.push_back(b[1]);\r\n        }\r\n        sort(co.begin(), co.end());\r\n        int m = unique(co.begin(), co.end()) - co.begin();\r\n        int j = 0, preH = 0;\r\n        vector<vector<int>> ans;\r\n        for (int i=0; i<m; i++) {\r\n            while (j<buildings.size() && buildings[j][0]<=co[i]) \r\n                pq.push(make_pair(buildings[j][2], buildings[j][1])), j++;\r\n            while (!pq.empty() && pq.top().second<=co[i]) pq.pop();\r\n            int nowH = pq.empty() ? 0 : pq.top().first;\r\n            if (nowH != preH) {\r\n                ans.push_back({co[i], nowH});\r\n                preH=nowH;\r\n            }\r\n        }\r\n        return ans;\r\n    }\r\n};",
+    "python": "class Solution:\r\n    def getSkyline(self, buildings: List[List[int]]) -> List[List[int]]:\r\n        d = collections.defaultdict(list)\r\n        \r\n        for i,(start, end, height) in enumerate(buildings):\r\n            d[start].append(height)\r\n            d[end].append(-height)\r\n            \r\n        l = list(d.keys())\r\n        l.sort()\r\n        \r\n        result = []\r\n        \r\n        active = []\r\n        \r\n        for key in l:\r\n            o = d[key]\r\n            o.sort(reverse=True)\r\n            for j in o:\r\n                if j > 0:\r\n                    if not result or not active:\r\n                        result.append([key, j])\r\n                        active.append(j)\r\n                    else:\r\n                        if j > active[-1]:\r\n                            result.append([key, j])\r\n                            active.append(j)\r\n                        else:\r\n                            active.insert(bisect_left(active, j), j)\r\n                else:\r\n                    idx = active.index(-j)\r\n                    if idx == len(active) - 1:\r\n                        active.pop()\r\n                        if active:\r\n                            result.append([key, active[-1]])\r\n                        else:\r\n                            result.append([key, 0])\r\n                    else:\r\n                        active.pop(idx)\r\n        \r\n        return result",
+    "java": "class height implements Comparable<height>{\r\n    int val = -1;\r\n    int pos = -1;\r\n    boolean isStart = false;\r\n    height(int a, int b, boolean c){\r\n        val = a;\r\n        pos = b;\r\n        isStart = c;\r\n    }\r\n    public int compareTo(height h){\r\n        if(this.pos != h.pos)\r\n            return this.pos-h.pos;\r\n        if(isStart)\r\n            return -1;\r\n        if(h.isStart)\r\n            return 1;\r\n        \r\n        return this.val-h.val;\r\n    }\r\n}\r\nclass Solution {\r\n    public List<List<Integer>> getSkyline(int[][] buildings) {\r\n        \r\n        PriorityQueue<height> mQ = new PriorityQueue<>();\r\n        int len = buildings.length;\r\n        for(int[] b: buildings) {\r\n            mQ.add(new height(b[2],b[0],true));\r\n            mQ.add(new height(b[2],b[1],false));\r\n        }\r\n        PriorityQueue<Integer> heap = new PriorityQueue<>(Collections.reverseOrder());\r\n        heap.add(0);\r\n        int prevHeight = 0;\r\n        List<List<Integer>> res = new ArrayList<>();\r\n        List<Integer> lst;\r\n        while(mQ.size()>0) {\r\n            height h = mQ.poll();\r\n            if(h.isStart){\r\n                heap.offer(h.val);\r\n            } else {\r\n                heap.remove(h.val);\r\n            }\r\n            \r\n            if(prevHeight != heap.peek()){\r\n                lst = new ArrayList<>();\r\n                lst.add(h.pos);\r\n                \r\n                if(res.size() > 0 && res.get(res.size()-1).get(0) == h.pos){\r\n                    lst.add(Math.max(heap.peek(), res.get(res.size()-1).get(1)));\r\n                    res.remove(res.size()-1);\r\n                } else \r\n                    lst.add(heap.peek());\r\n                res.add(lst);\r\n                prevHeight = heap.peek();\r\n            }\r\n        }\r\n        return res;\r\n    }\r\n}",
+    "javascript": "var getSkyline = function(buildings) {\r\n    \r\n    let results = [];\r\n    \r\n    let points = [];\r\n    \r\n    for (let building of buildings) {\r\n        points.push([building[0],building[2]])\r\n        points.push([building[1],-building[2]])\r\n    }\r\n    \r\n    let heights = [];\r\n    \r\n    points.sort((a,b)=>(b[1]-a[1]))\r\n    points.sort((a,b)=>(a[0]-b[0]))\r\n    \r\n    for (let point of points) {\r\n        if(point[1] >0) {\r\n            heights.push(point[1])\r\n        }\r\n        else {\r\n            heights.splice(heights.indexOf(-point[1]),1)\r\n        }\r\n        let curHeight = (heights.length == 0?0:Math.max(...heights))\r\n        \r\n        if(results.length == 0 || results[results.length-1][1] != curHeight) results.push([point[0], curHeight]);\r\n    }\r\n    \r\n    \r\n    return results;\r\n};"
+  }
+}

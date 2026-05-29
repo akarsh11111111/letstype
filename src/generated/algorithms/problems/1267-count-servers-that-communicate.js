@@ -1,0 +1,29 @@
+export default {
+  "id": 1267,
+  "name": "Count Servers that Communicate",
+  "difficulty": "medium",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/count-servers-that-communicate",
+  "relativeDir": "C/Count Servers that Communicate",
+  "slug": "1267-count-servers-that-communicate",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 41,
+    "java": 68,
+    "python": 22,
+    "javascript": 34
+  },
+  "languages": {
+    "cpp": "// Runtime: 72 ms (Top 82.64%) | Memory: 22.7 MB (Top 21.95%)\r\nclass Solution {\r\npublic:\r\n    int countServers(vector<vector<int>>& grid) {\r\n        int n=grid.size(),m=grid[0].size();\r\n        vector<vector<bool>>visited(n,vector<bool>(m,false));\r\n        for(int i=0;i<n;i++)\r\n        {\r\n            for(int j=0;j<m;j++)\r\n            {\r\n                if(grid[i][j] && !visited[i][j])\r\n                {\r\n                    bool flag=false;\r\n                    for(int x=0;x<n;x++)\r\n                    {\r\n                        if(x!=i && grid[x][j] && !visited[x][j])\r\n                            visited[x][j]=true,flag=true;\r\n                        if(!flag && x!=i && visited[x][j])\r\n                            flag=true;\r\n                    }\r\n                    for(int x=0;x<m;x++)\r\n                    {\r\n                        if(x!=j && grid[i][x] && !visited[i][x])\r\n                            visited[i][x]=true,flag=true;\r\n                        if(!flag && x!=j && visited[i][x])\r\n                            flag=true;\r\n                    }\r\n                    if(flag)\r\n                        visited[i][j]=true;\r\n                }\r\n            }\r\n        }\r\n        int ans=0;\r\n        for(int i=0;i<n;i++)\r\n            for(int j=0;j<m;j++)\r\n                if(visited[i][j])\r\n                    ans++;\r\n\r\n        return ans;\r\n    }\r\n};",
+    "python": "class Solution:\r\n    def countServers(self, grid: List[List[int]]) -> int:\r\n        def helper(row,col,count):\r\n            for c in range(len(grid[0])):\r\n                if c == col:\r\n                    continue\r\n                if grid[row][c] == 1:\r\n                    count += 1\r\n                    return count\r\n            for r in range(len(grid)):\r\n                if r == row:\r\n                    continue\r\n                if grid[r][col] == 1:\r\n                    count += 1\r\n                    return count\r\n            return count\r\n        count = 0\r\n        for row in range(len(grid)):\r\n            for col in range(len(grid[0])):\r\n                if grid[row][col] == 1:\r\n                    count = helper(row,col,count)\r\n        return count",
+    "java": "// Runtime: 24 ms (Top 15.77%) | Memory: 68.5 MB (Top 7.89%)\r\nclass Solution {\r\n    int []parent;\r\n    int []rank;\r\n    public int countServers(int[][] grid) {\r\n        parent=new int[grid.length*grid[0].length];\r\n        rank=new int[grid.length*grid[0].length];\r\n        for(int i=0;i<parent.length;i++){\r\n            parent[i]=i;\r\n            rank[i]=0;\r\n        }\r\n        for(int i=0;i<grid.length;i++){\r\n            for(int j=0;j<grid[0].length;j++){\r\n                if(grid[i][j]==1){\r\n                    check(i,j,grid);\r\n                }\r\n            }\r\n        }\r\n        int count=0;\r\n        for(int i=0;i<parent.length;i++){\r\n            if(parent[i]!=i||rank[i]>0){\r\n              count++;\r\n            }\r\n        }\r\n        return count;\r\n    }\r\n    public void check(int sr,int sc,int [][]grid){\r\n       int mbox=sr*grid[0].length+sc;\r\n        for(int i=sr;i<grid.length;i++){\r\n            if(grid[i][sc]==1){\r\n                int cbox=i*grid[0].length+sc;\r\n                int xl=find(mbox);\r\n                int yl=find(cbox);\r\n                if(xl!=yl){\r\n                    union(xl,yl);\r\n                }\r\n            }\r\n        }\r\n        for(int j=sc;j<grid[0].length;j++){\r\n            if(grid[sr][j]==1){\r\n                int cbox=sr*grid[0].length+j;\r\n                int xl=find(mbox);\r\n                int yl=find(cbox);\r\n                if(xl!=yl){\r\n                    union(xl,yl);\r\n                }\r\n            }\r\n        }\r\n    }\r\n    int find(int x){\r\n        if(parent[x]==x){\r\n            return x;\r\n        }else{\r\n            parent[x]=find(parent[x]);\r\n            return parent[x];\r\n        }\r\n    }\r\n    void union(int x,int y){\r\n        if(rank[x]>rank[y]){\r\n            parent[y]=x;\r\n        }else if(rank[y]>rank[x]){\r\n            parent[x]=y;\r\n        }else{\r\n            parent[x]=y;\r\n            rank[y]++;\r\n        }\r\n    }\r\n}",
+    "javascript": "var countServers = function(grid) {\r\n    const m = grid.length;\r\n    const n = grid[0].length;\r\n    \r\n    const lastRows = [];\r\n    const lastCols = [];\r\n    \r\n    const set = new Set();\r\n    \r\n    for (let i = 0; i < m; i++) {\r\n        for (let j = 0; j < n; j++) {\r\n            if (grid[i][j] === 1) {                \r\n                const currIdx = (i * n) + j;\r\n               \r\n                const rowNeiIdx = lastRows[i];\r\n                \r\n                if (rowNeiIdx != null) {\r\n                    set.add(currIdx).add(rowNeiIdx);\r\n                }\r\n                \r\n                const colNeiIdx = lastCols[j];\r\n                \r\n                if (colNeiIdx != null) {\r\n                    set.add(currIdx).add(colNeiIdx);\r\n                }\r\n                \r\n                lastRows[i] = currIdx;\r\n                lastCols[j] = currIdx;\r\n            }\r\n        }\r\n    }\r\n    \r\n    return set.size; \r\n};"
+  }
+}

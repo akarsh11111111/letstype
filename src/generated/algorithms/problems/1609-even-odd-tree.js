@@ -1,0 +1,29 @@
+export default {
+  "id": 1609,
+  "name": "Even Odd Tree",
+  "difficulty": "medium",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/even-odd-tree",
+  "relativeDir": "E/Even Odd Tree",
+  "slug": "1609-even-odd-tree",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 48,
+    "java": 35,
+    "python": 37,
+    "javascript": 40
+  },
+  "languages": {
+    "cpp": "// Runtime: 722 ms (Top 5.05%) | Memory: 169.4 MB (Top 18.67%)\r\nclass Solution {\r\npublic:\r\n    bool isEvenOddTree(TreeNode* root) {\r\n        queue<TreeNode*>q;\r\n        vector<vector<int>>ans;\r\n        if(root==NULL) return true;\r\n        q.push(root);\r\n        int j=0;\r\n        while(q.empty()!=true)\r\n        { vector<int>v;\r\n            int n=q.size();\r\n            for(int i=0;i<n;i++)\r\n            { TreeNode* t=q.front();q.pop();\r\n                v.push_back(t->val);\r\n                if(t->left) q.push(t->left);\r\n                if(t->right) q.push(t->right);\r\n            }\r\n         if(j%2==0)\r\n         {\r\n             for(int k=0;k<v.size()-1;k++)\r\n             {\r\n                 if(v[k]%2==0)\r\n                     return false;\r\n                 if(v[k]>=v[k+1])\r\n                     return false;\r\n             }\r\n             if(v[v.size()-1]%2==0)\r\n                 return false;\r\n         }\r\n         else\r\n         {\r\n              for(int k=0;k<v.size()-1;k++)\r\n             {\r\n                 if(v[k]%2==1)\r\n                     return false;\r\n                 if(v[k]<=v[k+1])\r\n                     return false;\r\n             }\r\n             if(v[v.size()-1]%2==1)\r\n                 return false;\r\n         }\r\n         j++;\r\n            ans.push_back(v);\r\n        }\r\n        return true;\r\n    }\r\n};",
+    "python": "from collections import deque\r\n# Runtime:838ms 44.05% || Memory: 40.8mb 57.22%\r\n# O(n) || O(h); where h is the height of the tree\r\n\r\nclass Solution:\r\n    def isEvenOddTree(self, root: Optional[TreeNode]) -> bool:\r\n        if not root:\r\n            return False\r\n\r\n        level = 0\r\n        evenOddLevel = {0:1, 1:0}\r\n        queue = deque([root])\r\n\r\n        while queue:\r\n            prev = 0\r\n            for _ in range(len(queue)):\r\n                currNode = queue.popleft()\r\n                comparison = {0:prev < currNode.val, 1:prev > currNode.val}\r\n                if currNode.val % 2 != evenOddLevel[level % 2]:\r\n                    return False\r\n                else:\r\n                    if prev != 0 and comparison[level % 2]:\r\n                        prev = currNode.val\r\n                    elif prev == 0:\r\n                        prev = currNode.val\r\n                    else:\r\n                        return False\r\n\r\n                if currNode.left:\r\n                    queue.append(currNode.left)\r\n\r\n                if currNode.right:\r\n                    queue.append(currNode.right)\r\n\r\n            level += 1\r\n\r\n        return True",
+    "java": "// Runtime: 9 ms (Top 96.0%) | Memory: 66.10 MB (Top 31.24%)\r\n\r\nclass Solution {\r\n    public boolean isEvenOddTree(TreeNode root) {\r\n        Queue<TreeNode> qu = new LinkedList<>();\r\n        qu.add(root);\r\n        boolean even = true; // maintain check for levels\r\n        while(qu.size()>0){\r\n            int size = qu.size();\r\n            int prev = (even)?0:Integer.MAX_VALUE; // start prev with 0 to check strictly increasing and Integer_MAX_VALUE to check strictly decreasing \r\n            while(size-->0){\r\n            TreeNode rem = qu.remove();\r\n                if(even){\r\n                    if(rem.val%2==0 || rem.val<=prev){ // false if value at even level is even or not strictly increasing \r\n                        return false;\r\n                    }\r\n                }else{\r\n                    if(rem.val%2!=0 || rem.val>=prev){// false if value at odd level is odd or not strictly decreasing\r\n                        return false;\r\n                    }\r\n                }\r\n                if(rem.left!=null){\r\n                    qu.add(rem.left); \r\n                }\r\n                if(rem.right!=null){\r\n                    qu.add(rem.right);\r\n                }\r\n                prev=rem.val;   //update previous\r\n              \r\n            }\r\n              even = !even; //change level\r\n        } \r\n        return true;\r\n    }\r\n}",
+    "javascript": "// Runtime: 172 ms (Top 86.4%) | Memory: 104.29 MB (Top 45.7%)\r\n\r\n/**\r\n * Definition for a binary tree node.\r\n * function TreeNode(val, left, right) {\r\n *     this.val = (val===undefined ? 0 : val)\r\n *     this.left = (left===undefined ? null : left)\r\n *     this.right = (right===undefined ? null : right)\r\n * }\r\n */\r\n/**\r\n * @param {TreeNode} root\r\n * @return {boolean}\r\n */\r\nvar isEvenOddTree = function(root) {\r\n    let queue = [root];\r\n    let steps = 0;\r\n\r\n    while(queue.length>0){\r\n        const currLength = queue.length;\r\n        let nextQueue=[];\r\n\r\n        for(let i=0; i<currLength;i++){\r\n            const node = queue[i];\r\n            if(steps%2 !== 0){\r\n                if((i<currLength-1 && node.val<=queue[i+1].val) || node.val%2 !== 0){\r\n                    return false;\r\n                }\r\n            }else if((i<currLength-1 && node.val>=queue[i+1].val)|| node.val%2 === 0){\r\n                return false;\r\n            }\r\n            if(node.left) nextQueue.push(node.left);\r\n            if(node.right) nextQueue.push(node.right);\r\n        }\r\n        queue = nextQueue;\r\n        steps++;\r\n    }\r\n\r\n    return true;\r\n};"
+  }
+}

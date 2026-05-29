@@ -1,0 +1,29 @@
+export default {
+  "id": 1959,
+  "name": "Minimum Total Space Wasted With K Resizing Operations",
+  "difficulty": "medium",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/minimum-total-space-wasted-with-k-resizing-operations",
+  "relativeDir": "M/Minimum Total Space Wasted With K Resizing Operations",
+  "slug": "1959-minimum-total-space-wasted-with-k-resizing-operations",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 27,
+    "java": 57,
+    "python": 29,
+    "javascript": 39
+  },
+  "languages": {
+    "cpp": "// Runtime: 171 ms (Top 98.16%) | Memory: 8.2 MB (Top 63.13%)\r\nclass Solution {\r\npublic:\r\n    int dp[205][205];\r\n    #define maxi pow(10,8)\r\n    #define ll long long\r\n    int dfs(vector<int>& nums, int idx, int k)\r\n    {\r\n        int n = nums.size();\r\n        if(idx==n) return 0;\r\n        if(k<0) return maxi;\r\n        if(dp[idx][k]!=-1) return dp[idx][k];\r\n        ll sum = 0, mx = 0, ans = maxi;\r\n        for(int i=idx; i<n; i++)\r\n        {\r\n            sum += nums[i];\r\n            mx = max(mx,(ll)nums[i]);\r\n            ans = min(ans,mx*(i-idx+1)-sum + dfs(nums,i+1,k-1));\r\n        }\r\n        return dp[idx][k] = ans;\r\n    }\r\n\r\n    int minSpaceWastedKResizing(vector<int>& nums, int k) {\r\n        memset(dp,-1,sizeof(dp));\r\n        return dfs(nums,0,k);\r\n    }\r\n};",
+    "python": "class Solution:\r\n    def minSpaceWastedKResizing(self, A: List[int], K: int) -> int:\r\n        def waste(i, j, h):\r\n            sumI = sums[i-1] if i > 0 else 0\r\n            return (j-i+1)*h - sums[j] + sumI\r\n        \r\n        def dp(i, k):\r\n            if i <= k:\r\n                return 0\r\n            if k < 0:\r\n                return MAX\r\n            if (i, k) in memoize:\r\n                return memoize[(i, k)]\r\n            \r\n            _max = A[i]\r\n            r = MAX\r\n            for j in range(i-1, -2, -1):\r\n                r = min(r, dp(j, k-1) + waste(j+1, i,  _max))\r\n                _max = max(_max, A[j])\r\n\r\n            memoize[(i, k)] = r\r\n            return r\r\n        \r\n        sums = list(accumulate(A))\r\n        n = len(A)\r\n        MAX = 10**6*200\r\n        memoize = {}\r\n\r\n        return dp(n-1, K)",
+    "java": "class Solution {\r\n\r\n// dp[idx][k]=minimum wasted space in between [idx....n-1] if we resize the region k times \r\n\r\n    int INF=200 *(int)1e6; // according to constarints { 1 <= nums.length <= 200 , 1 <= nums[i] <= 106 }\r\n    public int minSpaceWastedKResizing(int[] nums, int k) {\r\n        \r\n        int dp[][]=new int[nums.length+1][k+1];\r\n        memeset(dp, -1);\r\n        return f(dp, 0, k, nums);\r\n        \r\n    }\r\n    \r\n    int f(int dp[][], int idx, int k, int nums[])\r\n    {\r\n        if(idx==nums.length)\r\n            return 0;\r\n        if(k==-1)\r\n            return INF;\r\n        \r\n        if(dp[idx][k] != -1)\r\n            return dp[idx][k];\r\n        \r\n        int ans=INF, max=nums[idx], sum=0;\r\n        \r\n        for(int j=idx; j<nums.length; ++j)\r\n        {\r\n            max=Math.max(max, nums[j]);\r\n            sum+=nums[j];\r\n        /**    \r\n             total waste in between [idx...j] would be\r\n             summation of (max-nums[idx] + max-nums[idx+1]....max-nums[j])\r\n             length would be (j-idx+1) and these summation would be\r\n             (j-idx+1) * max upto j - (nums[idx]+nums[idx+1]....+nums[j]\r\n \r\n            as i have made one partition in between [idx...j] then remainig (k-1) partitions would be in between [j+1....n-1]\r\n            and that value will be calculated by the recursion and we have to take the minimum answer from all these combinations \r\n            and to avoid tle we are using memozization\r\n        **/\r\n            int total_waste_upto_j=(j-idx+1)*max - sum;\r\n            ans=Math.min(ans,  total_waste_upto_j + f(dp, j+1, k-1, nums));\r\n            \r\n        }\r\n        \r\n        return dp[idx][k]=ans;\r\n    }\r\n    \r\n    void memeset(int dp[][], int val)\r\n    {\r\n        for(int x[]: dp)\r\n            Arrays.fill(x, val);\r\n    }\r\n}\r\n\r\n// tc: O(n^2 * k) there will be total (n*k) states  because for each k there are n possibilities and for each n there will be loop running n times\r\n// so in total there will be O(n^2 * k) [because k<n]\r\n// sc: O(n*k)",
+    "javascript": "// Runtime: 230 ms (Top 100.0%) | Memory: 56.70 MB (Top 50.0%)\r\n\r\nvar minSpaceWastedKResizing = function(nums, k) {\r\n    var prefixSum = []; // prefix is index 1 based\r\n    var rangeMax = []; // index 0 based\r\n    var sum = 0;\r\n    prefixSum[0] = 0; \r\n    for (var i = 0; i < nums.length; i++) {\r\n        sum += nums[i];\r\n        prefixSum[i + 1] = sum;\r\n    }\r\n    for (var i = 0; i < nums.length; i++) {\r\n        var max = -Infinity;\r\n        rangeMax[i] = [];\r\n        for (var j = i; j < nums.length; j++) {\r\n            max = Math.max(nums[j], max);\r\n            rangeMax[i][j] = max;\r\n        }\r\n    }\r\n    var f = []; // f[i][j] is resize i times to get minimun with index j - 1 to get minimum space.\r\n    f[0] = [];\r\n    for (var i = 0; i <= k; i++) {\r\n        f[i] = [];\r\n        f[i][0] = 0;\r\n    }\r\n    for (var j = 1; j <= nums.length; j++) {\r\n        f[0][j] = rangeMax[0][j - 1] * j - prefixSum[j];\r\n    }\r\n\r\n    for (var i = 1; i <= k; i++) {\r\n        for (var j = 1; j <= nums.length; j++) {\r\n            f[i][j] = Infinity;\r\n            for (var m = 1; m <= j; m++) {\r\n                f[i][j] = Math.min(f[i][j], f[i - 1][m - 1] + rangeMax[m - 1][j - 1] * (j - m + 1) - (prefixSum[j] - prefixSum[m - 1]));\r\n            }\r\n        }\r\n    }\r\n    return f[k][nums.length];\r\n};"
+  }
+}

@@ -1,0 +1,29 @@
+export default {
+  "id": 926,
+  "name": "Flip String to Monotone Increasing",
+  "difficulty": "medium",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/flip-string-to-monotone-increasing",
+  "relativeDir": "F/Flip String to Monotone Increasing",
+  "slug": "0926-flip-string-to-monotone-increasing",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 41,
+    "java": 16,
+    "python": 33,
+    "javascript": 47
+  },
+  "languages": {
+    "cpp": "// Runtime: 46 ms (Top 47.95%) | Memory: 20.1 MB (Top 15.69%)\r\nclass Solution {\r\npublic:\r\n    int minFlipsMonoIncr(string s) {\r\n        //assume start making 1 from i th index\r\n        // what number of 0s we need to flip at right side\r\n        // what number of 1s we need to flip at left side\r\n        // for this maintain prefix and suffix\r\n\r\n        int n = s.size();\r\n        vector<int> noOfZerosToRight(n,0); // R to L\r\n        vector<int> noOfOnesToLeft(n,0); // L to R\r\n\r\n        if(s[0] == '1') noOfOnesToLeft[0] = 1;\r\n        for(int i=1;i<n;i++){\r\n            if(s[i] == '1') noOfOnesToLeft[i] = noOfOnesToLeft[i-1] + 1;\r\n            else noOfOnesToLeft[i] = noOfOnesToLeft[i-1];\r\n        }\r\n\r\n        if(s[n-1] == '0') noOfZerosToRight[n-1] = 1;\r\n        for(int i=n-2;i>=0;i--){\r\n            if(s[i] == '0') noOfZerosToRight[i] = noOfZerosToRight[i+1] + 1;\r\n            else noOfZerosToRight[i] = noOfZerosToRight[i+1];\r\n        }\r\n\r\n        // starting treating i as partition of 0 and 1:\r\n        // 0 at the lefts and 1 at the rights including i:\r\n        int ans = 1e9;\r\n        for(int i=0;i<n;i++){\r\n            int leftFlips = 0; //when we want all 1s\r\n            int rightFlips = noOfZerosToRight[i];\r\n\r\n            if(i-1 >= 0) leftFlips = noOfOnesToLeft[i-1];\r\n            ans = min(ans, (leftFlips + rightFlips));\r\n        }\r\n\r\n        ans = min(ans, noOfOnesToLeft.back() + 0); //when want all 0s\r\n        return ans;\r\n    }\r\n    //O(N) + O(N)\r\n};",
+    "python": "class Solution:\r\n    def minFlipsMonoIncr(self, s: str) -> int:\r\n        n = len(s)\r\n        min_flip = n\r\n        one_left = 0\r\n        # zero_right = 0\r\n        # for c in s:\r\n        #     if c == \"0\":\r\n        #         zero_right += 1\r\n        \r\n        zero_right = s.count(\"0\") # since we will start with 11...11 then every zero in s will be on the right side of the border\r\n        \r\n        # for each i imagine that we have the borderline at i index any index >= i will be 1 and index < i will be 0.\r\n        # i = 0, n = 5 -> 11111\r\n        # i = 1, n = 5 -> 01111\r\n        # i = 5        -> 00000\r\n        for i in range(n + 1):\r\n            # the number of flip will be equal number of 1 on the left side of the border + number of zero on the right side of the border\r\n            # from example     00110\r\n            #                    v \r\n            # comparing with   00111  : i = 2, one_left = 0, zero_right = 1, then we have to do 0 + 1 flip in this i\r\n            min_flip = min(min_flip,one_left+zero_right)\r\n            \r\n            # edge case for i = n or all zero (00...00)\r\n            if i == len(s):\r\n                continue\r\n            # reduce count of zero_right when 0 is moving to the 0-zone or left side of border\r\n            if s[i] == \"0\":\r\n                zero_right -= 1\r\n            else:\r\n                one_left += 1 # increase one on the left side when we move 1 into the left side\r\n        \r\n        return min_flip",
+    "java": "class Solution {\r\n    public int minFlipsMonoIncr(String s) {\r\n        int n = s.length();\r\n        int zeroToOne =0;\r\n        int countOfOnes=0;\r\n        for(int i=0;i<n;i++)\r\n        {\r\n            if(s.charAt(i)=='0')\r\n                zeroToOne=Math.min(zeroToOne+1,countOfOnes);\r\n            else\r\n                countOfOnes=countOfOnes+1;\r\n        }\r\n        return zeroToOne;\r\n        \r\n    }\r\n}",
+    "javascript": "function getPrefixSumArray(s) {\r\n    const prefixSumOfOnes = Array(s.length).fill(0);\r\n    \r\n    let currentSum = 0;\r\n    for (let x = 0; x < s.length; x++) {\r\n        if (s[x] === '1')\r\n            currentSum++;\r\n        \r\n        prefixSumOfOnes[x] = currentSum;\r\n    }\r\n    \r\n    return prefixSumOfOnes;\r\n}\r\n\r\nvar minFlipsMonoIncr = function(s) {\r\n    const prefixSumOfOnes = getPrefixSumArray(s);\r\n    \r\n    let answer = prefixSumOfOnes[s.length - 1]; // Case where we want to change to '0000'\r\n    \r\n    for (let x = 0; x < s.length; x++) {\r\n        const sizeOfRightHandSide = s.length - x;\r\n        let numChangesRequired = null;\r\n        \r\n        if (x === 0) { \r\n            // Case where we want to change to '1111'\r\n            const numOfOnesToChangeToZero = 0;\r\n            \r\n            const numOfOnesOnRightHandSide = prefixSumOfOnes[s.length - 1];\r\n            const numOfZerosToChangeToOne = sizeOfRightHandSide - numOfOnesOnRightHandSide;\r\n            \r\n            numChangesRequired = numOfOnesToChangeToZero + numOfZerosToChangeToOne;\r\n        }\r\n        else { \r\n            // Cases like '0111', '0011', '0001'\r\n            const numOfOnesToChangeToZero = prefixSumOfOnes[x - 1];\r\n            \r\n            const numOfOnesOnRightHandSide = prefixSumOfOnes[s.length - 1] - prefixSumOfOnes[x - 1];\r\n            const numOfZerosToChangeToOne = sizeOfRightHandSide - numOfOnesOnRightHandSide;\r\n            \r\n            numChangesRequired = numOfOnesToChangeToZero + numOfZerosToChangeToOne;\r\n        }\r\n        \r\n        answer = Math.min(answer, numChangesRequired);\r\n    }\r\n    \r\n    return answer;\r\n};"
+  }
+}

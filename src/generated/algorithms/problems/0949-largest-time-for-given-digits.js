@@ -1,0 +1,29 @@
+export default {
+  "id": 949,
+  "name": "Largest Time for Given Digits",
+  "difficulty": "medium",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/largest-time-for-given-digits",
+  "relativeDir": "L/Largest Time for Given Digits",
+  "slug": "0949-largest-time-for-given-digits",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 54,
+    "java": 42,
+    "python": 53,
+    "javascript": 20
+  },
+  "languages": {
+    "cpp": "class Solution {\r\npublic:\r\n    string largestTimeFromDigits(vector<int>& arr) {\r\n        sort(arr.rbegin(), arr.rend());\r\n        used.resize(4);\r\n        \r\n        string ret = \"\";\r\n        if(!dfs(arr,0,0)) return ret;\r\n        else\r\n        {\r\n            for(int i=0;i<2;i++)\r\n                ret.push_back(ans[i] + '0');\r\n            \r\n            ret.push_back(':');\r\n            \r\n            for(int i=2;i<4;i++)\r\n                ret.push_back(ans[i] + '0');\r\n        }\r\n        return ret;\r\n    }\r\n    \r\nprivate:\r\n    vector<int> min = {600, 60, 10, 1};\r\n    vector<int> ans;\r\n    vector<int> used;\r\n    bool dfs(const vector<int>& arr, int totalhour,int totalmin)\r\n    {\r\n        if(totalhour >= 24 * 60) return false;\r\n        if(totalmin >= 60) return false;\r\n        if(ans.size() == 4) return true;\r\n        \r\n        for(int i=0;i<4;i++)\r\n        {\r\n            if(used[i]) continue;\r\n            used[i] = 1;\r\n            \r\n            int pos = ans.size();\r\n            if(pos<2) totalhour += arr[i] * min[pos];\r\n            else totalmin += arr[i] * min[pos];\r\n            \r\n            ans.push_back(arr[i]);\r\n            \r\n            if(dfs(arr,totalhour,totalmin)) return true;\r\n            \r\n            if(pos<2) totalhour -= arr[i] * min[pos];\r\n            else totalmin -= arr[i] * min[pos];\r\n            \r\n            ans.pop_back();\r\n            used[i] = 0;\r\n        }\r\n        \r\n        return false;\r\n    }\r\n};",
+    "python": "class Solution:\r\n    def largestTimeFromDigits(self, arr: List[int]) -> str:\r\n        res = \"\"\r\n        digit_freq = collections.Counter(arr)\r\n        # first digit\r\n        \r\n        \r\n        if 2 in arr and sum([digit_freq[d] for d in range(6)]) > 2:\r\n            res += \"2\"\r\n            arr.remove(2)\r\n        else:\r\n            for digit in [1,0]:\r\n                if digit in arr:\r\n                    res += str(digit)\r\n                    arr.remove(digit)\r\n                    break\r\n        # can't make 24-hour time\r\n        if len(res) == 0:\r\n            return \"\"\r\n        \r\n        # second digit 0-3\r\n        if res == \"2\":\r\n            for digit in [3,2,1,0]:\r\n                if digit in arr:\r\n                    res += str(digit)\r\n                    arr.remove(digit)\r\n                    break\r\n            # no 0-3 left in arr\r\n            if len(res) == 1:\r\n                return \"\"\r\n        # second digit 0-9\r\n        else:\r\n            for digit in range(9,-1,-1):\r\n                if digit in arr:\r\n                    res += str(digit)\r\n                    arr.remove(digit)\r\n                    break\r\n        \r\n        res += \":\"\r\n        \r\n        for digit in range(5, -1, -1):\r\n            if digit in arr:\r\n                res += str(digit)\r\n                arr.remove(digit)\r\n                break\r\n            \r\n        if len(res) == 3:\r\n            return \"\"\r\n        \r\n        for digit in range(9,-1,-1):\r\n            if digit in arr:\r\n                res += str(digit)\r\n                return res",
+    "java": "class Solution {\r\n    public String largestTimeFromDigits(int[] arr) {\r\n        int[] count = new int[10];\r\n        for (int num: arr) {\r\n            count[num]++;\r\n        }\r\n        StringBuilder sb = backTrack(count, new StringBuilder());\r\n        if (sb.length() == 4) sb.insert(2, ':');\r\n        return sb.toString();\r\n        \r\n    }\r\n    private StringBuilder backTrack(int[] count, StringBuilder sb) {\r\n        int size = sb.length();\r\n        int start = 0;\r\n        if (size == 0) {\r\n            start = 2;\r\n        }\r\n        if (size == 1) {\r\n            start = sb.charAt(0) == '2' ? 3 : 9;\r\n        }\r\n        if (size == 2) {\r\n            start = 5;\r\n        }\r\n        if (size == 3) {\r\n            start = 9;\r\n        }\r\n        for (int i = start; i >= 0; i--) {\r\n            if (count[i] == 0) continue;\r\n            count[i]--;\r\n            sb.append(i);\r\n            backTrack(count, sb);\r\n            if (sb.length() == 4) {\r\n                return sb;\r\n            }\r\n            else {\r\n                count[Character.getNumericValue(sb.charAt(sb.length() - 1))]++;\r\n                sb.deleteCharAt(sb.length() - 1);\r\n            }\r\n        }\r\n        return sb;\r\n    }\r\n}",
+    "javascript": "var largestTimeFromDigits = function(arr) {\r\n    let max=-1;\r\n    for(let A=0; A<4; A++){\r\n        for(let B=0; B<4; B++){\r\n\t\t\tif(B==A){continue};\r\n            for(let C=0; C<4; C++){\r\n\t\t\t\tif(C==A||C==B||arr[C]>=6){continue};\r\n                for(let D=0; D<4; D++){\r\n\t\t\t\t\tif(D==A||D==B||D==C){continue};\r\n                    let time=arr[A]*1000+arr[B]*100+arr[C]*10+arr[D];\r\n                    if(time<2400){max=Math.max(max, time));\r\n                }\r\n            }\r\n        }\r\n    }\r\n\t// Case1: max<0, which means NOTHING VALID -> return \"\"\r\n\t// Case2: max isn't 4 digits. i.e.[0,0,0,0] -> padStart to make \"0000\"\r\n    let output=max.toString().padStart(4,0);\r\n    return max<0? \"\": output.substr(0,2)+\":\"+output.substr(2);\r\n};"
+  }
+}

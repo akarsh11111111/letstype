@@ -1,0 +1,26 @@
+export default {
+  "id": 1928,
+  "name": "Minimum Cost to Reach Destination in Time",
+  "difficulty": "hard",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/minimum-cost-to-reach-destination-in-time",
+  "relativeDir": "M/Minimum Cost to Reach Destination in Time",
+  "slug": "1928-minimum-cost-to-reach-destination-in-time",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 72,
+    "java": 39,
+    "python": 23
+  },
+  "languages": {
+    "cpp": "// Runtime: 375 ms (Top 31.89%) | Memory: 50.10 MB (Top 35.83%)\r\n\r\nclass Solution {\r\npublic:\r\n    vector<vector<int>> adj[1001];\r\n    int cost[1001], time[1001];\r\n    \r\n    int dijkstra(int src, int dest, int maxTime) {\r\n        \r\n        for (int i = 1; i <= dest; i++) {\r\n            cost[i] = INT_MAX;\r\n            time[i] = INT_MAX;\r\n        }\r\n        \r\n        priority_queue<vector<int>, vector<vector<int>>, greater<vector<int>>> pq;\r\n        pq.push({cost[src], time[src], src});\r\n        \r\n        while (pq.empty() == 0) {\r\n            vector<int> z = pq.top(); pq.pop();\r\n            \r\n            int c = z[0];     // cost\r\n            int t = z[1];     // time\r\n            int v = z[2];     // vertex\r\n            \r\n            for (int i=0;i<adj[v].size();i++) {\r\n                \r\n\t\t\t    // if this edge does not cause the time to exceed maxTime\r\n                if (t + adj[v][i][1] <= maxTime) {\r\n                    \r\n\t\t\t\t    // if cost will decrease\r\n                    if (cost[adj[v][i][0]] > c + adj[v][i][2]) {\r\n                        cost[adj[v][i][0]] = c + adj[v][i][2];\r\n                        \r\n                        time[adj[v][i][0]] = t + adj[v][i][1];\r\n                        pq.push({cost[adj[v][i][0]], time[adj[v][i][0]], adj[v][i][0]});\r\n                    }\r\n                    \r\n\t\t\t\t\t// if time will decrease\r\n                    else if (time[adj[v][i][0]] > t + adj[v][i][1]) {\r\n                        time[adj[v][i][0]] = t + adj[v][i][1];\r\n                        pq.push({c + adj[v][i][2], time[adj[v][i][0]], adj[v][i][0]});\r\n                    }\r\n                }\r\n            }\r\n        }\r\n        \r\n        return cost[dest];\r\n    }\r\n    \r\n    int minCost(int maxTime, vector<vector<int>>& edges, vector<int>& fee) {\r\n        int i, x, y, t, e = edges.size(), n = fee.size();\r\n        \r\n        for (i=0;i<e;i++) {\r\n            x = edges[i][0];\r\n            y = edges[i][1];\r\n            t = edges[i][2];\r\n            \r\n            adj[x].push_back({y, t, fee[y]});\r\n            adj[y].push_back({x, t, fee[x]});\r\n        }\r\n        \r\n        cost[0] = fee[0];\r\n        time[0] = 0;\r\n        \r\n        int ans = dijkstra(0, n-1, maxTime);\r\n        \r\n        if(ans == INT_MAX)\r\n            return -1;\r\n        \r\n        return ans;\r\n    }\r\n};",
+    "python": "class Solution:\r\n    def minCost(self, maxTime: int, edges: List[List[int]], passingFees: List[int]) -> int:\r\n        '''\r\n        Time: O((m+n)* maxtime), where m is length of edges\r\n        Space: O(n*maxtime)\r\n        '''\r\n        n = len(passingFees)\r\n        dp = [[math.inf]*(n) for _ in range(maxTime+1)]\r\n        dp[0][0] = passingFees[0]\r\n\r\n        ans = math.inf\r\n        for k in range(1, maxTime+1):\r\n            for x, y, time in edges:\r\n                if k >= time:\r\n                    # dual direction\r\n                    dp[k][y] = min(dp[k][y], dp[k-time][x] + passingFees[y])\r\n                    dp[k][x] = min(dp[k][x], dp[k-time][y] + passingFees[x])\r\n                \r\n            ans = min(ans, dp[k][n-1])\r\n        \r\n        if ans == math.inf:\r\n            return -1\r\n        return ans",
+    "java": "// Runtime: 34 ms (Top 94.1%) | Memory: 44.35 MB (Top 43.8%)\r\n\r\nclass Solution {\r\n    record Node(int i, int t) {}\r\n    record Cell(int i, int t, int c) {}\r\n    public int minCost(int maxTime, int[][] edges, int[] fees) {\r\n        int n = fees.length;\r\n\r\n        // create the adjacency list graph\r\n        List<Node>[] g = new List[n];\r\n        for (int i = 0; i < n; i++) g[i] = new ArrayList<>();\r\n        for (var e : edges) {\r\n            g[e[0]].add(new Node(e[1], e[2]));\r\n            g[e[1]].add(new Node(e[0], e[2]));\r\n        }\r\n\r\n        // Dijkstra\r\n        Queue<Cell> q = new PriorityQueue<>((a, b) -> a.c == b.c ? a.t - b.t : a.c - b.c);\r\n        int[] T = new int[n]; // 1. visited: de-dup 2. de-dup on worst time\r\n\r\n        q.offer(new Cell(0, 0, fees[0]));\r\n        Arrays.fill(T, maxTime + 1);\r\n        T[0] = 0;\r\n\r\n        while (!q.isEmpty()) {\r\n            var cur = q.poll();\r\n            if (cur.i == n-1) return cur.c;\r\n            \r\n            for (var nei : g[cur.i]) {\r\n                int t2 = cur.t + nei.t;\r\n                if (t2 >= T[nei.i]) continue; // if time is worst, no reason to continue\r\n                T[nei.i] = t2;\r\n                q.offer(new Cell(nei.i, t2, cur.c + fees[nei.i]));\r\n            }\r\n        }\r\n\r\n        return -1;\r\n    }\r\n}"
+  }
+}

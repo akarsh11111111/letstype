@@ -1,0 +1,29 @@
+export default {
+  "id": 592,
+  "name": "Fraction Addition and Subtraction",
+  "difficulty": "medium",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/fraction-addition-and-subtraction",
+  "relativeDir": "F/Fraction Addition and Subtraction",
+  "slug": "0592-fraction-addition-and-subtraction",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 52,
+    "java": 23,
+    "python": 51,
+    "javascript": 20
+  },
+  "languages": {
+    "cpp": "class Solution {\r\npublic:\r\n    string fractionAddition(string expression) {\r\n        \r\n        int res_num = 0; //keep track of numerator\r\n        int res_denom = 1; //keep track of denominator\r\n        char sign = '+'; //keep track of sign\r\n\t\t\r\n        for(int i = 0; i < expression.size(); i++){ //parse the expression string\r\n            int next_num = 0;\r\n            int next_denom = 0;\r\n            if(expression[i] == '+' || expression[i] == '-') //updating\r\n                sign = expression[i];\r\n            else{\r\n                int j = i+1;\r\n                while(j < expression.size() && expression[j] != '/') j++; build next numerator\r\n                next_num = stoi(expression.substr(i, j-i));\r\n                int k = j+1;\r\n                while(k < expression.size() && expression[k] >= '0' && expression[k] <= '9') k++; //build next denominator\r\n                next_denom = stoi(expression.substr(j+1, k-(j+1)));\r\n                if(res_denom != next_denom){ //update result numerator and denominator\r\n                    res_num *= next_denom;\r\n                    next_num *= res_denom;\r\n                    res_denom *= next_denom;\r\n                    }\r\n                if(sign == '+') res_num += next_num;\r\n                else res_num -= next_num;\r\n                i = k-1;\r\n            }\r\n        }\r\n        return lowestFraction(res_num, res_denom); //put the fraction into lowest terms and return as string\r\n    }\r\n    \r\nprivate:\r\n    int findGCD(int a, int b) { //find Greatest Common Denominator\r\n        if(b == 0) return a;\r\n        return findGCD(b, a % b);\r\n   }\r\n    \r\n   string lowestFraction(int num, int denom){ //use GCD to put fraction into lowest terms and return as string\r\n      int gcd;\r\n      gcd = findGCD(num, denom);\r\n      num /= gcd;\r\n      denom /= gcd;\r\n       if(denom < 0){\r\n           denom *= -1;\r\n           num *= -1;\r\n       }\r\n      return to_string(num) + '/' + to_string(denom);\r\n}\r\n    \r\n};",
+    "python": "# Runtime: 35 ms (Top 88.02%) | Memory: 14.1 MB (Top 5.79%)\r\n\"\"\"\r\napproach:\r\nfirst replace - with +- in the string so that implementation gets\r\na little easy\r\n\"\"\"\r\nclass Solution:\r\n    def fractionAddition(self, expression: str) -> str:\r\n        expression = expression.replace('-', '+-')\r\n        parts = [item for item in expression.split('+') if item != '']\r\n        numes, denoms, denom_set, lcm = [], [], set(), 1\r\n        def get_lcm(a, b):\r\n            if a == 1:\r\n                return b\r\n            if b == 1:\r\n                return a\r\n            if a < b:\r\n                if b % a == 0:\r\n                    return a * get_lcm(1, b/a)\r\n                else:\r\n                    return a * get_lcm(1, b)\r\n            else:\r\n                if a % b == 0:\r\n                    return b * get_lcm(a/b, 1)\r\n                else:\r\n                    return b * get_lcm(a, 1)\r\n\r\n        for part in parts:\r\n            num, den = part.split('/')\r\n            numes.append(int(num))\r\n            denoms.append(int(den))\r\n            lcm = get_lcm(lcm, int(den))\r\n\r\n        result = 0\r\n        for num, den in zip(numes, denoms):\r\n             result +=num * int(lcm/den)\r\n\r\n        def get_gcd(a, b):\r\n            if a == 0:\r\n                return b\r\n            if b == 0:\r\n                return a\r\n            if a == b:\r\n                return a\r\n            elif a < b:\r\n                return get_gcd(a, b-a)\r\n            else:\r\n                return get_gcd(a-b, b)\r\n\r\n        gcd = get_gcd(abs(result), lcm)\r\n        return str(int(result/gcd)) + '/' + str(int(lcm/gcd))",
+    "java": "// Runtime: 38 ms (Top 16.51%) | Memory: 44.40 MB (Top 27.52%)\r\n\r\nclass Solution {\r\n    private int gcd(int x, int y){\r\n        return x!=0?gcd(y%x, x):Math.abs(y);\r\n    }\r\n\r\n    public String fractionAddition(String exp) {\r\n        Scanner sc = new Scanner(exp).useDelimiter(\"/|(?=[-+])\");\r\n\r\n        int A=0, B=1;\r\n        while(sc.hasNext()){\r\n            int a = sc.nextInt(), b=sc.nextInt();\r\n            A = A * b + B * a;\r\n            B *= b;\r\n\r\n            int gcdX = gcd(A, B);\r\n            A/=gcdX;\r\n            B/=gcdX;\r\n        }\r\n        return A+\"/\"+B;\r\n    }\r\n}",
+    "javascript": "var fractionAddition = function(expression) {\r\n\tconst fractions = expression.split(/[+-]/).filter(Boolean);\r\n\tconst operator = expression.split(/[0-9/]/).filter(Boolean);\r\n\texpression[0] !== '-' && operator.unshift('+');\r\n\r\n\tconst gcd = (a, b) => b === 0 ? a : gcd(b, a % b);\r\n\tconst lcm = fractions.reduce((result, fraction) => {\r\n\t\tconst denominator = fraction.split('/')[1];\r\n\t\treturn result * denominator / gcd(result, denominator);\r\n\t}, 1);\r\n\r\n\tconst molecularSum = fractions.reduce((total, fraction, index) => {\r\n\t\tconst [molecular, denominator] = fraction.split('/');\r\n\t\tconst multiple = lcm / denominator * (operator[index] === '+' ? 1 : -1);\r\n\t\treturn total + molecular * multiple;\r\n\t}, 0);\r\n\r\n\tconst resultGcd = gcd(Math.abs(molecularSum), lcm);\r\n\treturn `${molecularSum / resultGcd}/${lcm / resultGcd}`;\r\n};"
+  }
+}

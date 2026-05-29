@@ -1,0 +1,29 @@
+export default {
+  "id": 1600,
+  "name": "Throne Inheritance",
+  "difficulty": "medium",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/throne-inheritance",
+  "relativeDir": "T/Throne Inheritance",
+  "slug": "1600-throne-inheritance",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 32,
+    "java": 44,
+    "python": 49,
+    "javascript": 52
+  },
+  "languages": {
+    "cpp": "class ThroneInheritance {\r\npublic:\r\n    ThroneInheritance(string kingName) {\r\n        curr_king = kingName;\r\n    }\r\n    \r\n    void birth(string parentName, string childName) {\r\n        children[parentName].push_back(childName);\r\n    }\r\n    \r\n    void death(string name) {\r\n        dead.insert(name);\r\n    }\r\n    \r\n    void rec(string parent) {\r\n        if (!dead.count(parent)) inheritance.push_back(parent);\r\n        for (auto child : children[parent])\r\n            rec(child);\r\n    }\r\n    \r\n    vector<string> getInheritanceOrder() {\r\n        inheritance = {};\r\n        rec(curr_king);\r\n        return inheritance;\r\n    }\r\n    \r\nprivate:\r\n    unordered_map<string, vector<string>> children;\r\n    vector<string> inheritance;\r\n    unordered_set<string> dead;\r\n    string curr_king;\r\n};",
+    "python": "# Runtime: 1338 ms (Top 35.29%) | Memory: 68.8 MB (Top 82.35%)\r\n\r\nclass ThroneInheritance:\r\n\r\n    def __init__(self, kingName: str):\r\n        # Taking kingName as root\r\n        self.root = kingName\r\n\r\n        # notDead will hold all the people who are alive and their level number\r\n        self.alive = {}\r\n        self.alive[kingName] = 0\r\n\r\n        # hold edges existing in our graph\r\n        self.edges = {self.root:[]}\r\n\r\n    def birth(self, parentName: str, childName: str) -> None:\r\n        # birth --> new child so update alive\r\n        self.alive[childName] = self.alive[parentName]+1\r\n\r\n        # add parent to child edges in the edges dictionary\r\n        if parentName in self.edges:\r\n            self.edges[parentName].append(childName)\r\n            if childName not in self.edges:\r\n                self.edges[childName] = []\r\n        else:\r\n            if childName not in self.edges:\r\n                self.edges[childName] = []\r\n            self.edges[parentName] = [childName]\r\n\r\n    def death(self, name: str) -> None:\r\n        # removing the dead people from alive map\r\n        del self.alive[name]\r\n\r\n    def getInheritanceOrder(self) -> List[str]:\r\n\r\n        hierarchy = []\r\n        def dfs(cur,parent=-1):\r\n            nonlocal hierarchy\r\n\r\n            # current person available in alive then only add in hierarchy\r\n            if cur in self.alive:\r\n                hierarchy.append(cur)\r\n\r\n            # traverse all the children of current node\r\n            for i in self.edges[cur]:\r\n                if i!=parent:\r\n                    dfs(i,cur)\r\n        dfs(self.root)\r\n        return hierarchy",
+    "java": "class Tree{\r\n    List<Tree>child;\r\n    String name;\r\n    public Tree(String name,List<Tree>child){\r\n        this.name=name;\r\n        this.child=child;\r\n    }\r\n}\r\nclass ThroneInheritance {\r\n    private Set<String>death;\r\n    private Tree tree;\r\n    private Map<String,Tree>addtoTree;\r\n    public ThroneInheritance(String kingName) {\r\n      death=new HashSet<>();  \r\n      tree=new Tree(kingName,new ArrayList());\r\n      addtoTree=new HashMap();\r\n      addtoTree.put(kingName,tree);   \r\n    }\r\n    \r\n    public void birth(String parentName, String childName) {\r\n           Tree tmp =addtoTree.get(parentName);\r\n           Tree childtree=new Tree(childName,new ArrayList());\r\n           tmp.child.add(childtree);\r\n            addtoTree.put( childName,childtree); \r\n    }\r\n    \r\n    public void death(String name) {\r\n        death.add(name);\r\n    }\r\n    \r\n    public List<String> getInheritanceOrder() {\r\n        List<String>ans=new ArrayList<>();\r\n        preOreder(tree,ans,death);\r\n        return ans;\r\n    }\r\n    \r\n    void preOreder(Tree n,List<String>ans,Set<String>death){\r\n        if(n==null)return;\r\n        if(!death.contains(n.name))ans.add(n.name);\r\n         for(Tree name:n.child){\r\n            preOreder(name,ans,death);\r\n        }\r\n    }\r\n}",
+    "javascript": "// Runtime: 1005 ms (Top 57.89%) | Memory: 120.3 MB (Top 22.81%)\r\nvar bloodList = function(name, parent = null) {\r\n    return {\r\n        name,\r\n        children: []\r\n    };\r\n}\r\n\r\nvar ThroneInheritance = function(kingName) {\r\n    this.nameMap = new Map();\r\n    this.nameMap.set(kingName, bloodList(kingName));\r\n    this.king = kingName;\r\n    this.deadList = new Set();\r\n};\r\n\r\n/**\r\n * @param {string} parentName\r\n * @param {string} childName\r\n * @return {void}\r\n */\r\nThroneInheritance.prototype.birth = function(parentName, childName) {\r\n    const parent = this.nameMap.get(parentName);\r\n    const childId = bloodList(childName, parent);\r\n    this.nameMap.set(childName, childId);\r\n    parent.children.push(childId);\r\n};\r\n\r\n/**\r\n * @param {string} name\r\n * @return {void}\r\n */\r\nThroneInheritance.prototype.death = function(name) {\r\n    this.deadList.add(name);\r\n};\r\n\r\n/**\r\n * @return {string[]}\r\n */\r\nfunction updateList(list, nameId, deadList) {\r\n    if (!deadList.has(nameId.name))\r\n        list.push(nameId.name);\r\n\r\n    for (let child of nameId.children) {\r\n        updateList(list, child, deadList);\r\n    }\r\n}\r\n\r\nThroneInheritance.prototype.getInheritanceOrder = function() {\r\n    let list = [];\r\n    updateList(list, this.nameMap.get(this.king), this.deadList);\r\n    return list;\r\n};"
+  }
+}

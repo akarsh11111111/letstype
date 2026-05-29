@@ -1,0 +1,29 @@
+export default {
+  "id": 1268,
+  "name": "Search Suggestions System",
+  "difficulty": "medium",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/search-suggestions-system",
+  "relativeDir": "S/Search Suggestions System",
+  "slug": "1268-search-suggestions-system",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 48,
+    "java": 39,
+    "python": 10,
+    "javascript": 94
+  },
+  "languages": {
+    "cpp": "class Solution {\r\npublic:\r\n    vector<vector<string>> suggestedProducts(vector<string>& products, string searchWord) {\r\n        map<int, vector<string>> m;\r\n        vector<vector<string>> res;\r\n        for (int i = 0; i < products.size(); i++)\r\n        {\r\n            int j = 0;\r\n            while (products[i][j] == searchWord[j] && j < searchWord.size())\r\n            {\r\n                if (m.count(j) == 0)\r\n                {\r\n                    vector<string> v;\r\n                    v.push_back(products[i]);\r\n                    m.insert(make_pair(j, v));\r\n                }\r\n                else\r\n                {\r\n                    m[j].push_back(products[i]);\r\n                }\r\n                j++;\r\n            }\r\n        }\r\n        for (int i = 0; i < searchWord.size(); i++)\r\n        {\r\n            if (i < m.size())\r\n            {\r\n                sort(m[i].begin(), m[i].end());\r\n                int a;\r\n                if (3 <= m[i].size())\r\n                {\r\n                    a = 3;\r\n                }\r\n                else\r\n                {\r\n                    a = m[i].size();\r\n                }\r\n                m[i].resize(a);\r\n                res.push_back(m[i]);\r\n            }\r\n            else\r\n            {\r\n                res.push_back({});\r\n            }\r\n        }\r\n        return res;\r\n    }\r\n};",
+    "python": "// Runtime: 78 ms (Top 77.93%) | Memory: 19.60 MB (Top 79.27%)\r\n\r\nclass Solution:\r\n    def suggestedProducts(self, products: List[str], searchWord: str) -> List[List[str]]:\r\n        list_ = []\r\n        products.sort()\r\n        for i, c in enumerate(searchWord):\r\n            products = [ p for p in products if len(p) > i and p[i] == c ]\r\n            list_.append(products[:3])\r\n        return list_",
+    "java": "// Runtime: 68 ms (Top 48.70%) | Memory: 45.5 MB (Top 96.95%)\r\nclass Solution\r\n{\r\n    public List<List<String>> suggestedProducts(String[] products, String searchWord)\r\n    {\r\n        PriorityQueue<String> pq= new PriorityQueue<String>();\r\n        List<List<String>> res= new LinkedList<List<String>>();\r\n        List<String> segment= new LinkedList<String>();\r\n        for(int i=0;i<products.length;i++)\r\n            pq.offer(products[i]);\r\n\r\n        for(int j=0;j<searchWord.length();j++)\r\n        {\r\n            segment= new LinkedList<String>();\r\n            pq= reduce(pq,searchWord.substring(0,j+1));\r\n            PriorityQueue<String> pri= new PriorityQueue<>(pq);\r\n            int p=0;\r\n            while(p<pq.size()&&p<3)\r\n            {\r\n                segment.add(pri.poll());\r\n                p++;\r\n            }\r\n            res.add(segment);\r\n        }\r\n        return res;\r\n    }\r\n    public PriorityQueue<String> reduce(PriorityQueue<String> pr, String filter)\r\n    {\r\n        PriorityQueue<String> p= new PriorityQueue<>();\r\n        String s=\"\";\r\n        while(!pr.isEmpty())\r\n        {\r\n            s=pr.poll();\r\n            if(s.startsWith(filter))\r\n                p.add(s);\r\n        }\r\n        return p;\r\n    }\r\n}",
+    "javascript": "function TrieNode(key) {\r\n  this.key = key\r\n  this.parent = null\r\n  this.children  = {}\r\n  this.end = false\r\n  \r\n  this.getWord = function() {\r\n    let output = []\r\n    let node = this\r\n    \r\n    while(node !== null) {\r\n      output.unshift(node.key)\r\n      node = node.parent\r\n    }\r\n    \r\n    return output.join('')\r\n  }\r\n} \r\n\r\nfunction Trie() {\r\n  this.root = new TrieNode(null)\r\n  \r\n  this.insert = function(word) {\r\n    let node = this.root\r\n    \r\n    for (let i = 0; i < word.length; i++) {\r\n      if (!node.children[word[i]]) {\r\n        node.children[word[i]] = new TrieNode(word[i])\r\n        node.children[word[i]].parent = node\r\n      }\r\n      \r\n      node = node.children[word[i]]\r\n      \r\n      if (i === word.length - 1) {\r\n        node.end = true\r\n      }\r\n    }\r\n  }\r\n  \r\n  this.findAllWords = function (node, arr) {\r\n    if (node.end) {\r\n      arr.unshift(node.getWord());\r\n    }\r\n\r\n    for (let child in node.children) {\r\n      this.findAllWords(node.children[child], arr);\r\n    }\r\n  }\r\n  \r\n  this.find  = function(prefix) {\r\n    let node = this.root\r\n    let output = []\r\n\r\n    for(let i = 0; i < prefix.length; i++) {\r\n      if (node.children[prefix[i]]) {\r\n        node = node.children[prefix[i]]\r\n      } else {\r\n        return output\r\n      }\r\n    }\r\n\r\n    this.findAllWords(node, output)\r\n    \r\n    output.sort()\r\n\r\n    return output.slice(0, 3)\r\n  }\r\n  \r\n  this.search = function(word) {\r\n    let node = this.root\r\n    let output = []\r\n    \r\n    for (let i = 0; i < word.length; i++) {\r\n      output.push(this.find(word.substring(0, i + 1)))\r\n    }\r\n    \r\n    return output\r\n  }\r\n}\r\n\r\n/**\r\n * @param {string[]} products\r\n * @param {string} searchWord\r\n * @return {string[][]}\r\n */\r\nvar suggestedProducts = function(products, searchWord) {\r\n  let trie = new Trie()\r\n  \r\n  for (let product of products) {\r\n    trie.insert(product)\r\n  }\r\n  \r\n  return trie.search(searchWord)\r\n};"
+  }
+}

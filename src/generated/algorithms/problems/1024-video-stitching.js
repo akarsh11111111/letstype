@@ -1,0 +1,29 @@
+export default {
+  "id": 1024,
+  "name": "Video Stitching",
+  "difficulty": "medium",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/video-stitching",
+  "relativeDir": "V/Video Stitching",
+  "slug": "1024-video-stitching",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 38,
+    "java": 31,
+    "python": 13,
+    "javascript": 60
+  },
+  "languages": {
+    "cpp": "// Runtime: 16 ms (Top 23.82%) | Memory: 9 MB (Top 5.98%)\r\nclass Solution {\r\npublic:\r\n    static bool comp(vector<int> a, vector<int> b){\r\n        if(a[0]<b[0]) return true;\r\n        else if(a[0]==b[0]) return a[1]>b[1];\r\n        return false;\r\n    }\r\n\r\n    int videoStitching(vector<vector<int>>& clips, int time) {\r\n        sort(clips.begin(), clips.end(), comp);\r\n        vector<vector<int>> res;\r\n        //check if 0 is present or not\r\n        if(clips[0][0] != 0) return -1;\r\n        res.push_back(clips[0]);\r\n        //if 1. First check if the required interval is already covered or not\r\n        //if 2. If the first value of the already inserted element in res is equal, then the next value if obviously smaller interval because of custom sorting so, we should skip it\r\n        //if 3. Cover every value by checking if the interval is required or not (already present?) if required then insert it\r\n        //if 3.1. Check if the interval to be inserted covers the interval at the back for example [0,4], [2,6], now if we were to insert the interval [4, 7], then [2,6] is no more requried, then pop_back.\r\n    for(int i=1; i<clips.size(); i++){\r\n            if(res.back()[1]>=time) break;\r\n            if(clips[i][0]==res.back()[0]) continue;\r\n            if(clips[i][1]>res.back()[1]){\r\n                if(res.size()>1 and res[res.size()-2][1]>=clips[i][0]) res.pop_back();\r\n                res.push_back(clips[i]);\r\n            }\r\n        }\r\n        //Check if the compelete range from 0 to time is covered or not\r\n        int prev = res[0][1];\r\n        for(int i=1; i<res.size(); i++){\r\n            if(res[i][0]>prev) return -1;\r\n            prev = res[i][1];\r\n        }\r\n        //check explicitly for the last value\r\n        if(res.back()[1]<time) return -1;\r\n        return res.size();\r\n    }\r\n};",
+    "python": "# Runtime: 46 ms (Top 41.2%) | Memory: 16.25 MB (Top 82.7%)\r\n\r\nclass Solution:\r\n    def videoStitching(self, clips: List[List[int]], T: int) -> int:\r\n        dp = [float('inf')] * (T + 1)\r\n        dp[0] = 0\r\n        for i in range(1, T + 1):\r\n            for start, end in clips:\r\n                if start <= i <= end:\r\n                    dp[i] = min(dp[start] + 1, dp[i])\r\n        if dp[T] == float('inf'):\r\n            return -1\r\n        return dp[T]",
+    "java": "class Solution {\r\n    public int videoStitching(int[][] clips, int time) {\r\n        Arrays.sort(clips , (x , y) -> x[0] == y[0] ? y[1] - x[1] : x[0] - y[0]);\r\n        int n = clips.length;\r\n        int interval[] = new int[2];\r\n        int cuts = 0;\r\n        while(true){\r\n            cuts++;\r\n            int can_reach = 0;\r\n            for(int i = interval[0]; i <= interval[1]; i++){\r\n                int j = 0;\r\n                while(j < n){\r\n                    if(clips[j][0] < i){\r\n                        j++;\r\n                    }\r\n                    else if(clips[j][0] == i){\r\n                        can_reach = Math.max(can_reach , clips[j][1]);\r\n                        j++;\r\n                    }\r\n                    else{\r\n                        break;\r\n                    }\r\n                }\r\n                if(can_reach >= time) return cuts;\r\n            }\r\n            interval[0] = interval[1] + 1;\r\n            interval[1] = can_reach;\r\n            if(interval[0] > interval[1]) return -1;\r\n        }\r\n    }\r\n}",
+    "javascript": "/** https://leetcode.com/problems/video-stitching/\r\n * @param {number[][]} clips\r\n * @param {number} time\r\n * @return {number}\r\n */\r\nvar videoStitching = function(clips, time) {\r\n  // Memo\r\n  this.memo = new Map();\r\n  \r\n  // Sort the clips for easier iteration\r\n  clips.sort((a, b) => a[0] - b[0]);\r\n  \r\n  // If the output is `Infinity` it means the task is impossible\r\n  let out = dp(clips, time, 0, -1);\r\n  return out === Infinity ? -1 : out;\r\n};\r\n\r\nvar dp = function(clips, time, index, endTime) {\r\n  let key = `${index}_${endTime}`;\r\n  \r\n  // Base, we got all the clip we need\r\n  if (endTime >= time) {\r\n    return 0;\r\n  }\r\n  \r\n  // Reach end of the clip array\r\n  if (index === clips.length) {\r\n    return Infinity;\r\n  }\r\n  \r\n  // Return form memo\r\n  if (this.memo.has(key) === true) {\r\n    return this.memo.get(key);\r\n  }\r\n  \r\n  // There are 2 choices, include clip in current `index` or exclude\r\n  // Include clip in current `index`\r\n  let include = Infinity;\r\n  \r\n  // We can only include clip in current `index` if either:\r\n  // - the `endTime` is -1 and current clip's starting is 0, in which this clip is the first segment\r\n  // - the `endTime` is greater than current clip's starting time, in which this clip has end time greater than our `endTime`\r\n  if ((endTime < 0 && clips[index][0] === 0) ||\r\n      endTime >= clips[index][0]) {\r\n    // Update the next `endTime` with the current clip's end time, `clips[index][1]`\r\n    let nextEndTime = clips[index][1];\r\n    include = 1 + dp(clips, time, index + 1, nextEndTime);\r\n  }\r\n  \r\n  // Exclude clip in current `index`\r\n  let exclude = dp(clips, time, index + 1, endTime);\r\n  \r\n  // Find which one has less clips\r\n  let count = Math.min(include, exclude);\r\n  \r\n  // Set memo\r\n  this.memo.set(key, count);\r\n  \r\n  return count;\r\n};"
+  }
+}

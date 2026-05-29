@@ -1,0 +1,29 @@
+export default {
+  "id": 1687,
+  "name": "Delivering Boxes from Storage to Ports",
+  "difficulty": "hard",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/delivering-boxes-from-storage-to-ports",
+  "relativeDir": "D/Delivering Boxes from Storage to Ports",
+  "slug": "1687-delivering-boxes-from-storage-to-ports",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 61,
+    "java": 26,
+    "python": 26,
+    "javascript": 31
+  },
+  "languages": {
+    "cpp": "// Runtime: 573 ms (Top 17.9%) | Memory: 159.65 MB (Top 21.0%)\r\n\r\nclass Solution {\r\npublic:\r\n    vector<int> stree;\r\n    void update(int tidx, int s, int e, int idx, int val){\r\n        if(s == e){\r\n            stree[tidx] = val;\r\n            return;\r\n        }\r\n        int mid = (s + e)/2;\r\n        if(idx <= mid) update(2*tidx, s, mid, idx, val);\r\n        else update(2*tidx+1, mid+1, e, idx, val);\r\n        stree[tidx] = min(stree[2*tidx], stree[2*tidx+1]);\r\n    }\r\n    int query(int tidx, int s, int e, int l, int r){\r\n        if(s > r or e < l) return INT_MAX;\r\n        else if(s >= l and e <= r) return stree[tidx];\r\n        int mid = (s + e)/2;\r\n        int left = query(2*tidx, s, mid, l, r);\r\n        int right = query(2*tidx+1, mid+1, e, l, r);\r\n        return min(left, right);\r\n    }\r\n    int boxDelivering(vector<vector<int>>& boxes, int port, int box, int weigh) {\r\n        int n = boxes.size();\r\n        vector<long long> trips(n+1), pref(n);\r\n        trips[0] = 0, pref[0] = boxes[0][1];\r\n        for(int i=1;i<n;i++){\r\n            pref[i] = pref[i-1] + boxes[i][1];\r\n            if(boxes[i][0] != boxes[i-1][0]){\r\n                trips[i] = trips[i-1] + 1;\r\n            }\r\n            else{\r\n                trips[i] = trips[i-1];\r\n            }\r\n        }\r\n        trips[n] = trips[n-1];\r\n        vector<long long> dp(n);\r\n        stree = vector<int> (4*n + 1, INT_MAX);\r\n        update(1, 0, n-1, 0, 0);\r\n        // dp[i] = dp[j] + (trips[i] - trips[j+1]) + 2\r\n        for(int i=0;i<n;i++){\r\n            // L nikalo ?\r\n            int l = 0, r = i;\r\n            while(l < r){\r\n                int mid = (l + r)/2;\r\n                long long tot = pref[i] - ((mid-1>=0)?pref[mid-1]:0);\r\n                if(tot <= weigh and i-mid+1 <= box){\r\n                    r = mid;\r\n                }\r\n                else{\r\n                    l = mid + 1;\r\n                }\r\n            }\r\n            int mini = query(1, 0, n, l, i);\r\n            dp[i] = mini + trips[i] + 2;\r\n            update(1, 0, n, i+1, dp[i] - trips[i+1]);\r\n        }\r\n        return dp[n-1];\r\n    }\r\n};",
+    "python": "// Runtime: 2593 ms (Top 36.11%) | Memory: 66.70 MB (Top 22.22%)\r\n\r\nfrom sortedcontainers import SortedList as MonoQueue\r\nclass Solution:\r\n    def boxDelivering(self, A, __, B, W):\r\n        n = len(A)\r\n        def slidingWindow():\r\n            l=0\r\n            cW = 0\r\n            for r in range(n):\r\n                cW+=A[r][1]\r\n                while cW>W or r-l+1>B:\r\n                    cW-=A[l][1]\r\n                    l+=1\r\n                yield l,r\r\n        Seg=MonoQueue(key=lambda t:t[1])\r\n        addAll = 0\r\n        olddp = 0\r\n        for l,r in slidingWindow():\r\n            if r!=0:\r\n                addAll+= ( A[r][0]!=A[r-1][0] )\r\n            Seg.add((r, olddp-addAll+2))\r\n            while Seg[0][0]<l:\r\n                Seg.pop(0)\r\n            olddp = Seg[0][1]+addAll\r\n        return olddp",
+    "java": "class Solution {\r\n    public int boxDelivering(int[][] boxes, int portsCount, int maxBoxes, int maxWeight) {\r\n        int[] diffCity = new int[boxes.length+1];\r\n        int[] weights = new int[boxes.length+1];\r\n        \r\n        for (int i = 0; i < boxes.length; i++) {\r\n            diffCity[i+1] = diffCity[i] + ((i != 0 && boxes[i][0] == boxes[i-1][0]) ? 0 : 1);\r\n            weights[i+1] = weights[i] + boxes[i][1];\r\n        }\r\n        int[] dp = new int[boxes.length+1];\r\n        Arrays.fill(dp, Integer.MAX_VALUE);\r\n        dp[0] = 0;\r\n        diffCity[0] = 1;\r\n        for (int i = 1; i <= boxes.length; i++) { // offset by 1 since our above logic reaches dp[-1]\r\n            for (int j = i - 1; j >= 0; j--) {\r\n                int dC= diffCity[i] - diffCity[j+1]; // computes # of different cities from i to j. (add 1 to j is necessary here)\r\n                int w = weights[i] - weights[j]; \r\n                int b = i - j;\r\n                if (b <= maxBoxes && w <= maxWeight) {\r\n                    dp[i] = Math.min(dp[i], 2 + dC + dp[j]); \r\n                }\r\n            }\r\n        }\r\n        return dp[boxes.length];\r\n    }\r\n}",
+    "javascript": "// Runtime: 310 ms (Top 33.33%) | Memory: 85.8 MB (Top 33.33%)\r\n\r\n/**\r\n * @param {number[][]} boxes\r\n * @param {number} portsCount\r\n * @param {number} maxBoxes\r\n * @param {number} maxWeight\r\n * @return {number}\r\n */\r\nvar boxDelivering = function(boxes, portsCount, maxBoxes, maxWeight) {\r\n\r\n    const trips = Array(boxes.length + 1).fill(0);\r\n    let left = 0;\r\n    let diff = 0;\r\n\r\n    for (let right = 0; right < boxes.length; right++) {\r\n        maxBoxes--;\r\n        maxWeight -= boxes[right][1];\r\n        if (right > 0 && boxes[right][0] !== boxes[right - 1][0]) diff++;\r\n\r\n        while (maxBoxes < 0 || maxWeight < 0 || (left < right && trips[left + 1] === trips[left])) {\r\n            maxBoxes++;\r\n            maxWeight += boxes[left++][1];\r\n            if (boxes[left][0] !== boxes[left - 1][0]) diff--;\r\n        }\r\n\r\n        trips[right + 1] = diff + 2 + trips[left];\r\n    }\r\n\r\n    return trips[boxes.length];\r\n};"
+  }
+}

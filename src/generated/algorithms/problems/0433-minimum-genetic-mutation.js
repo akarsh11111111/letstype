@@ -1,0 +1,29 @@
+export default {
+  "id": 433,
+  "name": "Minimum Genetic Mutation",
+  "difficulty": "medium",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/minimum-genetic-mutation",
+  "relativeDir": "M/Minimum Genetic Mutation",
+  "slug": "0433-minimum-genetic-mutation",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 37,
+    "java": 37,
+    "python": 32,
+    "javascript": 57
+  },
+  "languages": {
+    "cpp": "class Solution {\r\npublic:\r\n    int minMutation(string start, string end, vector<string>& bank) {\r\n        unordered_set<string> st(bank.begin(), bank.end());\r\n        if (st.find(end) == st.end()) return -1;\r\n        \r\n        queue<string> q;\r\n        q.push(start);\r\n        \r\n        unordered_set<string> vis;\r\n        vis.insert(start);\r\n        \r\n        int res=0;\r\n        while (not q.empty()) {\r\n            int sz = q.size();\r\n            \r\n            while (sz--) {\r\n                string currString = q.front(); q.pop();\r\n                if (currString == end) return res;\r\n                \r\n                for (int i=0;i<currString.size();i++) {\r\n                    string temp = currString;\r\n                    for (auto g: string(\"ATGC\")) {\r\n                        temp[i] = g;\r\n                        if (st.find(temp) != st.end() and (vis.find(temp) == vis.end())) {\r\n                            q.push(temp);\r\n                            vis.insert(temp);\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n            res++;\r\n        }\r\n        \r\n        return -1;\r\n    }\r\n};",
+    "python": "class Solution:\r\n    def minMutation(self, start: str, end: str, bank: List[str]) -> int:\r\n        q = deque()\r\n        q.append(start)\r\n        n = len(bank)\r\n        last = 0\r\n        used = [False] * n\r\n        for i, x in enumerate(bank):\r\n            if start == x:\r\n                used[i] = True\r\n            if end == x:\r\n                last = i\r\n        dist = 0\r\n        while q:\r\n            dist += 1\r\n            for _ in range(len(q)):\r\n                w = q.popleft()\r\n                for i, x in enumerate(bank):\r\n                    if used[i]:\r\n                        continue\r\n                    bad = 0\r\n                    for j in range(8):\r\n                        if w[j] != x[j]:\r\n                            bad += 1\r\n                            if bad == 2:\r\n                                break\r\n                    if bad == 1:\r\n                        if last == i:\r\n                            return dist\r\n                        used[i] = True\r\n                        q.append(x)\r\n        return -1",
+    "java": "// Runtime: 1 ms (Top 90.87%) | Memory: 42.6 MB (Top 7.49%)\r\nclass Solution {\r\n    public int minMutation(String start, String end, String[] bank) {\r\n        Set<String> set = new HashSet<>();\r\n        for(String tmp: bank){\r\n            set.add(tmp);\r\n        }\r\n        if(!set.contains(end)) return -1;\r\n        if(start.equals(end)) return 0;\r\n        char[] var = {'A','C','G','T'};\r\n        Queue<String> q = new LinkedList<>();\r\n        q.add(start);\r\n        int count = 0;\r\n        while(!q.isEmpty()){\r\n            int size = q.size();\r\n            for(int i = 0; i < size; i ++){\r\n                String str = q.poll();\r\n                char[] tmp = str.toCharArray();\r\n                if(str.equals(end)) return count;\r\n                for(int j = 0; j < 8; j ++){\r\n                    char ch = tmp[j];\r\n                    for(int k = 0; k < 4; k ++){\r\n                        tmp[j] = var[k];\r\n                        String node = new String(tmp);\r\n                        if(set.contains(node)){\r\n                            q.add(node);\r\n                            set.remove(node);\r\n                        }\r\n                    }\r\n                    tmp[j] = ch;\r\n                }\r\n            }\r\n            count++;\r\n        }\r\n        return -1;\r\n    }\r\n}",
+    "javascript": "// Runtime: 82 ms (Top 57.43%) | Memory: 42.3 MB (Top 30.69%)\r\n/**\r\n * @param {string} start\r\n * @param {string} end\r\n * @param {string[]} bank\r\n * @return {number}\r\n */\r\nvar minMutation = function(start, end, bank) {\r\n    if(start.length!=end.length || !contains(end,bank)){\r\n            return -1;\r\n        }\r\n        return bfs(start,end,bank);\r\n    };\r\n    function contains(end,bank){\r\n        for(const x of bank){\r\n            if(x==end){\r\n                return true;\r\n            }\r\n        }\r\n        return false;\r\n    }\r\n    function convertPossible(a,b){\r\n        if(a.length != b.length) return false;\r\n        let count=0;\r\n        for(let i=0;i<a.length;i++){\r\n            if(a[i]!=b[i]){\r\n                count++;\r\n            }\r\n        }\r\n        return count==1;\r\n    }\r\n    function bfs(start,end,bank){\r\n        let count=0;\r\n        let q=[];\r\n        let set=new Set();\r\n        q.push(start);\r\n\r\n        while(q.length>0){\r\n            let size=q.length;\r\n\r\n            for(let i=0;i<size;i++){\r\n                let curr=q.shift();\r\n\r\n                if(curr==end){\r\n                    return count;\r\n                }\r\n                bank.forEach((x)=>{\r\n                    if(convertPossible(curr,x) && !set.has(x)){\r\n                        q.push(x);\r\n                        set.add(x);\r\n                    }\r\n                })\r\n            }\r\n            count++;\r\n        }\r\n        return -1;\r\n    }"
+  }
+}

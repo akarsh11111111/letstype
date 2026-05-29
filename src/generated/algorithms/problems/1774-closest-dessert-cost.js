@@ -1,0 +1,26 @@
+export default {
+  "id": 1774,
+  "name": "Closest Dessert Cost",
+  "difficulty": "medium",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/closest-dessert-cost",
+  "relativeDir": "C/Closest Dessert Cost",
+  "slug": "1774-closest-dessert-cost",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 77,
+    "java": 31,
+    "python": 28
+  },
+  "languages": {
+    "cpp": "// Runtime: 12 ms (Top 88.73%) | Memory: 9.9 MB (Top 42.44%)\r\nclass Solution {\r\npublic:\r\n\r\n    //ans-> store final result\r\n    //mn -> Current minimum difference b/w target and curr_price\r\n    int ans=INT_MAX,mn=INT_MAX;\r\n\r\n    /*\r\n      i-> index of tc(toppingCosts)\r\n      curr -> current cost taken\r\n      tar -> Target cost\r\n    */\r\n\r\n    void find(int i,vector<int>& tc,int curr, int tar)\r\n    {\r\n        /*\r\n           if difference b/w current cost and target cost is\r\n           less than min difference , so we have to update ans\r\n           and min difference because we got closest to target\r\n        */\r\n        if(abs(curr-tar)<mn)\r\n        {\r\n            mn=abs(curr-tar);\r\n            ans=curr;\r\n        }\r\n\r\n        /*\r\n           if difference b/w current cost and target cost is\r\n           equal to min difference , so we have to update ans\r\n           and takin minimum one as condition given in problem\r\n        */\r\n        if(abs(curr-tar)==mn) ans=min(ans,curr);\r\n\r\n        /*\r\n           If we are going out of bound just return\r\n           because we will nothing get after here\r\n        */\r\n        if(i>=tc.size() || curr-tar>mn) return;\r\n\r\n        /* Main interesting thing -> How to recurse */\r\n        /*\r\n            Just put all the required conditions\r\n\r\n            NOTE: We have already taken 1 baseCosts, so left that\r\n                  We have to select from tc(toppingCosts)\r\n\r\n            In our question we have 3 conditon\r\n            1. Take ith toppingCosts and go for next (i+1)th toppingCost\r\n            2. Take ith toppingCosts 2 times and go for next (i+1)th toppingCost\r\n            3. We will not take ith toppingCosts and will select next ones\r\n        */\r\n\r\n        //taking ith toppingCosts and moving to (i+1)th toppingCosts\r\n         find(i+1,tc,curr+tc[i],tar);\r\n\r\n        //taking ith toppingCosts 2 times and moving to (i+1)th toppingCosts\r\n         find(i+1,tc,curr+2*tc[i],tar);\r\n\r\n        //Without taking ith toppingCosts and move to (i+1)th toppingCosts for next one\r\n         find(i+1,tc,curr,tar);\r\n\r\n    }\r\n    int closestCost(vector<int>& baseCosts, vector<int>& toppingCosts, int target) {\r\n\r\n        //take each baseCost every time\r\n        for(auto x:baseCosts)\r\n        {\r\n            //taking ith baseCost and select toppingCosts\r\n            find(0,toppingCosts,x,target);\r\n        }\r\n\r\n        //return closest to target answer\r\n        return ans;\r\n\r\n    }\r\n};",
+    "python": "class Solution:\r\n    def closestCost(self, baseCosts: List[int], toppingCosts: List[int], target: int) -> int:\r\n        self.ans = self.diff = float('inf')\r\n        \r\n        n = len(baseCosts)\r\n        m = len(toppingCosts)\r\n        \r\n        \r\n        def solve(sum, target, indx):\r\n            if abs(sum - target) < self.diff:\r\n                self.diff = abs(sum - target)\r\n                self.ans = sum\r\n            elif abs(sum - target) == self.diff:\r\n                self.ans = min(self.ans, sum)\r\n            \r\n            \r\n            if indx == m:\r\n                return\r\n            \r\n            i = indx\r\n            for count in range(3):\r\n                sum += toppingCosts[i]*count\r\n                solve(sum,target,i+1)\r\n                sum -= toppingCosts[i]*count\r\n        \r\n        for i in baseCosts:\r\n            solve(i, target, 0)\r\n        return self.ans",
+    "java": "// Runtime: 2 ms (Top 100.0%) | Memory: 39.60 MB (Top 90.1%)\r\n\r\nclass Solution {\r\n    /** Closest cost result */\r\n    int closestCost = Integer.MAX_VALUE;\r\n    /** Difference between closest cost result and target so far */\r\n    int closestCostDiff = Integer.MAX_VALUE;\r\n\r\n    public int closestCost(int[] baseCosts, int[] toppingCosts, int target) {\r\n        for (int base : baseCosts) {\r\n            dfs(toppingCosts, 0, base, target);\r\n        }\r\n        return closestCost;\r\n    }\r\n\r\n    public void dfs(int[] toppingCosts, int toppingIndex, int cost, int target) {\r\n        int costDiff = Math.abs(target - cost);\r\n        if (costDiff < closestCostDiff || (costDiff == closestCostDiff && cost < closestCost)) {\r\n            closestCostDiff = costDiff;\r\n            closestCost = cost;\r\n        }\r\n        \r\n        // Since toppings are all positive cost, stop dfs early if cost exceeds target\r\n        if (toppingIndex >= toppingCosts.length || cost > target)\r\n            return;\r\n\r\n        dfs(toppingCosts, toppingIndex + 1, cost, target);\r\n        dfs(toppingCosts, toppingIndex + 1, cost + toppingCosts[toppingIndex], target);\r\n        dfs(toppingCosts, toppingIndex + 1, cost + 2 * toppingCosts[toppingIndex], target);\r\n    }\r\n}"
+  }
+}

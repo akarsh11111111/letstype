@@ -1,0 +1,29 @@
+export default {
+  "id": 1043,
+  "name": "Partition Array for Maximum Sum",
+  "difficulty": "medium",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/partition-array-for-maximum-sum",
+  "relativeDir": "P/Partition Array for Maximum Sum",
+  "slug": "1043-partition-array-for-maximum-sum",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 35,
+    "java": 59,
+    "python": 23,
+    "javascript": 38
+  },
+  "languages": {
+    "cpp": "// Runtime: 392 ms (Top 5.27%) | Memory: 19.5 MB (Top 5.07%)\r\nclass Solution {\r\npublic:\r\n\r\n    int get_max(vector<int>&arr , int s , int e ){\r\n        int mx_val = *max_element(arr.begin() + s , arr.begin() + e + 1);\r\n        return (e-s + 1 )* mx_val ;\r\n    }\r\n\r\n    int solve( vector<int>&arr , int idx , int k , vector<vector<int>>&dp){\r\n\r\n        if(idx >= arr.size() ) return 0;\r\n\r\n        if(dp[idx][k] != -1 )\r\n            return dp[idx][k];\r\n\r\n        int ans = 0;\r\n\r\n        for(int i = 0 ; i<k ; ++i ){\r\n            if((idx + i ) > arr.size() - 1)\r\n                break;\r\n\r\n            int val = get_max(arr , idx , idx + i ) + solve( arr , idx + i + 1 , k , dp );\r\n            ans = max( ans , val );\r\n        }\r\n        return dp[idx][k] = ans ;\r\n\r\n    }\r\n\r\n    int maxSumAfterPartitioning(vector<int>& arr, int k) {\r\n        vector<vector<int>>dp(arr.size()+1 , vector<int>( k + 1 , -1 ));\r\n\r\n        return solve( arr , 0 , k , dp );\r\n    }\r\n};",
+    "python": "class Solution:\r\n    def maxSumAfterPartitioning(self, nums: List[int], k: int) -> int:\r\n        def get_max(start, end):\r\n            return max(nums[start:end + 1]) * (end - start + 1)\r\n\r\n        def dfs(start):\r\n            if start == N: # base case, so in tabulation we go [N - 1]...[0], as [N] = 0\r\n                return 0\r\n            \r\n            maxi = float(-inf)\r\n\t\t\t# you partition at every position up to start + k and repeat the same process for the next partition\r\n\t\t\t# e.g. 1 9 3, k = 2\r\n\t\t\t# 1|9|3 => with max in each partition: 1|9|3 = 13\r\n\t\t\t# 1|9 3 => with max in each partition: 1|9 9 = 19\r\n\t\t\t# 1 9|3 => with max in each partition: 9 9|3 = 21\r\n\t\t\t# get max_in_partition(start,end) + give_me_max_for_array(previous_partition_end + 1, N)\r\n\t\t\t# rec.relation = max(max_sum_in_partition[start, end] + dfs(end + 1)))\r\n            for end in range(start, min(N, start + k)):\r\n                maxi = max(maxi, get_max(start, end) + dfs(end + 1))\r\n            return maxi\r\n        \r\n        N = len(nums)\r\n        return dfs(0)",
+    "java": "// Runtime: 1456 ms (Top 5.08%) | Memory: 117.3 MB (Top 5.08%)\r\nclass Solution {\r\n    public int maxSumAfterPartitioning(int[] arr, int k) {\r\n         return maxSum(arr,k, 0 );\r\n\r\n    }\r\n    public int maxSum(int[] arr, int k, int start) {\r\n        int curr1 = 0, curr2= 0;\r\n        int prev = 0;\r\n        int max = 0;\r\n\r\n        Map<String, Integer> memo = new HashMap();\r\n        //memo.put(\"0,0\", arr[0]);\r\n\r\n        for(int i=0; i< arr.length; ++i){\r\n            //without current element\r\n            curr1 = prev + arr[i];\r\n\r\n            //with current element, find max if p=0...k (since subarray can be longeth of at most k)\r\n            int tempk = 0, half1 = 0, half2 = 0, temp= 0;\r\n            for(int p=0; p<=k; ++p){\r\n                half1 = findMaxSumWithKEle(arr, p , i);\r\n                tempk = i-p;\r\n                half2 = memo.get((\"0,\"+tempk)) == null ? 0: memo.get((\"0,\"+tempk));\r\n                if(temp < half1 + half2){\r\n                    temp = half1 + half2;\r\n                }\r\n            }\r\n\r\n            curr2 = temp;\r\n\r\n            //find max between curr1 or curr2 - with current elemtn in the subarray or outside the subarray\r\n            max = (curr1 < curr2) ? curr2:curr1;\r\n\r\n            //add in memo\r\n            String key= \"0,\" + i;\r\n            memo.put(key, max);\r\n            System.out.println(\"Max: \" + max + \" from [\" + key + \"]\");\r\n            prev = max;\r\n        }\r\n\r\n        return max;\r\n    }\r\n\r\n    public static Integer findMaxSumWithKEle(int[] arr, int k, int end) {\r\n        int max= 0;\r\n        if(end > arr.length || end<0){\r\n            return 0;\r\n        }\r\n        int c = 0;\r\n        for(int i=end; i> (end -k ) && i>=0; --i){\r\n            ++c;\r\n            if(max < arr[i]){\r\n                max = arr[i];\r\n            }\r\n        }\r\n        return max *c;\r\n    }\r\n}",
+    "javascript": "/** https://leetcode.com/problems/partition-array-for-maximum-sum/\r\n * @param {number[]} arr\r\n * @param {number} k\r\n * @return {number}\r\n */\r\nvar maxSumAfterPartitioning = function(arr, k) {\r\n  // Array to hold max value for each integer in `arr`\r\n  let dp = Array(arr.length).fill(0);\r\n  dp[0] = arr[0];\r\n  \r\n  // Calculate max value for each integer\r\n  for (let i = 1; i < arr.length; i++) {\r\n    // The `maxK` is largest number from `i` to `i - k - 1`\r\n    let maxK = 0;\r\n    \r\n    // The `maxVal` is for holding max value to be added to `dp[i]`\r\n    let maxVal = 0;\r\n    \r\n    // Loop through `i` to `i - k - 1`\r\n    for (let j = 1; j <= k; j++) {\r\n      // Get max number\r\n      maxK = Math.max(maxK, arr[i - (j - 1)]);\r\n      \r\n      // Calculate `maxVal`, if current `i` is smaller than `k`, we don't need to continue\r\n      if (i < j) {\r\n        maxVal = Math.max(maxVal, maxK * j);\r\n        break;\r\n      }\r\n      \r\n      maxVal = Math.max(maxVal, dp[i - j] + (maxK * j));\r\n    }\r\n    \r\n    // Store `maxVal`\r\n    dp[i] = maxVal;\r\n  }\r\n  \r\n  return dp[dp.length - 1];\r\n};"
+  }
+}

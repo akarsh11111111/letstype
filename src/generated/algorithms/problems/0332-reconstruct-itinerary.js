@@ -1,0 +1,29 @@
+export default {
+  "id": 332,
+  "name": "Reconstruct Itinerary",
+  "difficulty": "hard",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/reconstruct-itinerary",
+  "relativeDir": "R/Reconstruct Itinerary",
+  "slug": "0332-reconstruct-itinerary",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 26,
+    "java": 28,
+    "python": 35,
+    "javascript": 32
+  },
+  "languages": {
+    "cpp": "// Runtime: 91 ms (Top 9.61%) | Memory: 14.2 MB (Top 85.49%)\r\nclass Solution {\r\npublic:\r\n    vector<string> findItinerary(vector<vector<string>>& tickets) {\r\n        unordered_map<string, multiset<string>> myMap;\r\n        stack<string> myStack;\r\n        vector<string> ans;\r\n        for (int i=0; i<tickets.size(); ++i) {\r\n            myMap[tickets[i][0]].insert(tickets[i][1]);\r\n        }\r\n        myStack.push({\"JFK\"});\r\n        while (!myStack.empty()) {\r\n            string top = myStack.top();\r\n            if (!myMap[top].empty()) {\r\n                myStack.push(*myMap[top].begin());\r\n                myMap[top].erase(myMap[top].begin());\r\n            } else {\r\n                ans.insert(ans.begin(), top);\r\n                myStack.pop();\r\n            }\r\n        }\r\n        return ans;\r\n    }\r\n};\r\n// Time : O(E)\r\n// Space : O(V + E)",
+    "python": "class Solution:        \r\n    def findTicketsAdjList(self, tickets):\r\n        ticket = {}\r\n        for src,dest in tickets:\r\n            if src in ticket:\r\n                ticket[src].append(dest)\r\n            else:\r\n                ticket[src] = [dest]\r\n\r\n        for src,dest in ticket.items():\r\n            if len(dest)>1:\r\n                ticket[src] = sorted(ticket[src], reverse=True)\r\n                \r\n        return ticket\r\n    \r\n    def reconstructItinerary(self, source, tickets, itinerary):\r\n        if source in tickets:\r\n            while tickets[source]:        \r\n                destination = tickets[source].pop()\r\n                self.reconstructItinerary(destination, tickets, itinerary)\r\n        itinerary.append(source)\r\n        return itinerary\r\n                        \r\n    def findItinerary(self, tickets: List[List[str]]) -> List[str]:\r\n        if len(tickets)==1:\r\n            if \"JFK\" not in tickets[0]:\r\n                return []\r\n            \r\n        ticketsAdj = self.findTicketsAdjList(tickets)\r\n        if \"JFK\" not in ticketsAdj:\r\n            return []\r\n        itinerary = []\r\n        itinerary = self.reconstructItinerary(\"JFK\", ticketsAdj, itinerary)\r\n        \r\n        return itinerary[::-1]",
+    "java": "// Runtime: 7 ms (Top 90.17%) | Memory: 50.3 MB (Top 42.47%)\r\nclass Solution {\r\n    LinkedList<String> res = new LinkedList<>();\r\n\r\n    public List<String> findItinerary(List<List<String>> tickets) {\r\n        HashMap<String,PriorityQueue<String>> map= new HashMap<>();\r\n        for(int i=0;i<tickets.size();i++){\r\n            String a=tickets.get(i).get(0);\r\n            String b=tickets.get(i).get(1);\r\n            if(!map.containsKey(a)){\r\n                PriorityQueue<String> temp = new PriorityQueue();\r\n                map.put(a,temp);\r\n            }\r\n            map.get(a).add(b);\r\n        }\r\n\r\n        dfs(\"JFK\",map);\r\n        return res;\r\n\r\n    }\r\n    private void dfs(String departure,HashMap<String,PriorityQueue<String>> map){\r\n        PriorityQueue<String> arrivals= map.get(departure);\r\n        while(arrivals!=null &&!arrivals.isEmpty()){\r\n            dfs(arrivals.poll(),map);\r\n        }\r\n        res.addFirst(departure);\r\n    }\r\n}",
+    "javascript": "function dfs(edges,s=`JFK`,ans=[`JFK`]){  //run dfs, starting node being `JFK`\r\n    if(!edges[s] || edges[s].length==0){  //if currenctly reached node has its adjacent list empty\r\n        let isAllTravelled=1;\r\n        Object.values(edges).forEach(ele=> {if(ele.length>0) isAllTravelled=0}) // check if every edge has been travelled i.e all adjacentLists should be empty\r\n         if(!isAllTravelled) return false;   //returns false when there are more edges to travel , but from current node we cannot move anywhere else \r\n        else return  ans; // return true if from current node we cannot move anywhere else and all the edges have been travelled as well\r\n    }\r\n    \r\n    let myAL= edges[s].sort();  // sort the Adjacency List  of current node lexicographically\r\n    for(let i=0;i<myAL.length;i++){ // start by taking the lexicographically smallest node and run dfs\r\n        ans.push(myAL[i]);  // add current node into answer array\r\n        edges[s]= [...edges[s].slice(0,edges[s].indexOf(myAL[i])),...edges[s].slice(edges[s].indexOf(myAL[i])+1)]; // remove the currently edges travelled from adjacency List \r\n        let xx= dfs(edges,myAL[i],ans); //here runs the dfs\r\n        if(!xx){ // if dfs result of current node could not travel all edges from current node\r\n            ans.pop(); // pop out current accounted node from answer\r\n            edges[s].push(myAL[i]);  //put back the edge into adjacency list assmuing we should not visit this edge at this point as it doesnt leads to answer from here currenlt\r\n        }\r\n        else return xx ; // if dfs result of current node could travel all edges from current node return the answer array\r\n    } \r\n}\r\nvar findItinerary = function(tickets) {\r\n    let edges={}; //our adjacency list\r\n    tickets.forEach(ticket=>{\r\n       if(!edges[ticket[0]]){\r\n            edges[ticket[0]]=[];\r\n        }\r\n        edges[ticket[0]].push(ticket[1]);\r\n    })\r\n   \r\n    let ans= dfs(edges); // run dfs \r\n    return ans;\r\n};"
+  }
+}

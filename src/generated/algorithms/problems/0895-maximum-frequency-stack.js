@@ -1,0 +1,29 @@
+export default {
+  "id": 895,
+  "name": "Maximum Frequency Stack",
+  "difficulty": "hard",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/maximum-frequency-stack",
+  "relativeDir": "M/Maximum Frequency Stack",
+  "slug": "0895-maximum-frequency-stack",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 53,
+    "java": 46,
+    "python": 27,
+    "javascript": 61
+  },
+  "languages": {
+    "cpp": "class FreqStack {\r\npublic:\r\n    unordered_map<int,int> ump;\r\n    unordered_map<int,stack<int>> ump_st;\r\n    \r\n    int cap=1;\r\n    \r\n    FreqStack() {\r\n        ump.clear();\r\n        ump_st.clear();\r\n    }\r\n    \r\n    void push(int val) {\r\n\t\r\n\t\t//increasing the count\r\n        if(ump.find(val)!=ump.end())\r\n        {\r\n            ump[val]++;\r\n        }\r\n        else\r\n        {\r\n            ump[val]=1;\r\n        }\r\n        \r\n\t\t//update the highest level\r\n        if(cap<ump[val])\r\n        {\r\n            cap = ump[val];\r\n        }\r\n\t\t\r\n        //push the elements in the stack where it belongs as per height\r\n        ump_st[ump[val]].push(val);\r\n    }\r\n    \r\n    int pop() {\r\n        int val = ump_st[cap].top();\r\n        ump_st[cap].pop();\r\n        \r\n        if(ump_st[cap].size()==0)\r\n        {\r\n            cap--;\r\n        }\r\n        \r\n        ump[val]--;\r\n        \r\n        if(ump[val]==0)\r\n        {\r\n            ump.erase(val);\r\n        }\r\n        \r\n        return val;\r\n    }\r\n};",
+    "python": "# Runtime: 347 ms (Top 94.76%) | Memory: 22.7 MB (Top 60.86%)\r\nclass FreqStack:\r\n\r\n    def __init__(self):\r\n        self.cnt = {}\r\n        self.maxcount = 0\r\n        self.stack = {}\r\n\r\n    def push(self, val: int) -> None:\r\n        count = self.cnt.get(val,0)+1\r\n        self.cnt[val] = count\r\n        if count>self.maxcount:\r\n            self.maxcount = count\r\n            self.stack[count] = []\r\n        self.stack[count].append(val)\r\n\r\n    def pop(self) -> int:\r\n        res = self.stack[self.maxcount].pop()\r\n        self.cnt[res]-=1\r\n        if not self.stack[self.maxcount]:\r\n            self.maxcount-=1\r\n        return res\r\n\r\n# Your FreqStack object will be instantiated and called as such:\r\n# obj = FreqStack()\r\n# obj.push(val)\r\n# param_2 = obj.pop()",
+    "java": "// Runtime: 46 ms (Top 83.25%) | Memory: 51.6 MB (Top 94.52%)\r\nclass Node{\r\n    int data, freq, time;\r\n    Node(int data, int freq, int time){\r\n        this.data=data;\r\n        this.freq=freq;\r\n        this.time=time;\r\n    }\r\n}\r\n\r\nclass CompareNode implements Comparator<Node>{\r\n    @Override\r\n    public int compare(Node a, Node b){\r\n        if(a.freq-b.freq==0){\r\n            return b.time-a.time;\r\n        }\r\n        return b.freq-a.freq;\r\n    }\r\n}\r\n\r\nclass FreqStack {\r\n    PriorityQueue<Node> pq;\r\n    Map<Integer,Node> map;\r\n    int c=0;\r\n    public FreqStack(){\r\n        pq=new PriorityQueue<>(new CompareNode());\r\n        map=new HashMap<>();\r\n    }\r\n\r\n    public void push(int val){\r\n        c++;\r\n        int freq=1;\r\n        if(map.containsKey(val)){\r\n            freq+=map.get(val).freq;\r\n        }\r\n        map.put(val, new Node(val, freq, c));\r\n        pq.add(new Node(val,freq,c++));\r\n    }\r\n\r\n    public int pop() {\r\n        Node r=pq.remove();\r\n        Node a=map.get(r.data);\r\n        a.freq--;\r\n        return r.data;\r\n    }\r\n}",
+    "javascript": "// Runtime: 672 ms (Top 16.08%) | Memory: 83 MB (Top 51.75%)\r\nvar FreqStack = function() {\r\n    //hashMap to keep track of the values being repeated\r\n    this.frequencyMap = {};\r\n\r\n    //List map to keep track of the sequence of the value being entered\r\n    this.listMap = {};\r\n\r\n    //Max Frequency variable to keep track of the max frequency\r\n    this.maxValueFrequency = 0;\r\n};\r\n\r\n/**\r\n * @param {number} val\r\n * @return {void}\r\n */\r\nFreqStack.prototype.push = function(val) {\r\n    //if the hashMap doesn't have value being pushed then make a entry to it with 1 else increament by 1\r\n    this.frequencyMap[val] = this.frequencyMap[val] ? this.frequencyMap[val]+1 : 1;\r\n\r\n    //get the frequency of the value being pushed\r\n    const currentValueFrequency = this.frequencyMap[val];\r\n\r\n    //check if the current frequency is max or itself\r\n    this.maxValueFrequency = Math.max(this.maxValueFrequency, currentValueFrequency);\r\n\r\n    //if current value frequency is not in the listmap then make a new entry else push it\r\n    if(!this.listMap[currentValueFrequency]) this.listMap[currentValueFrequency] =[val];\r\n    else this.listMap[currentValueFrequency].push(val);\r\n\r\n};\r\n\r\n/**\r\n * @return {number}\r\n */\r\nFreqStack.prototype.pop = function() {\r\n    //make a temporary list of the max value frequency\r\n    const tempList = this.listMap[this.maxValueFrequency];\r\n\r\n    //get the last element from the temporary list\r\n    const top = tempList[tempList.length - 1];\r\n\r\n    //remove the item from the list\r\n    tempList.pop();\r\n\r\n    //update the list\r\n    this.listMap[this.maxValueFrequency] = tempList;\r\n\r\n    //if the popped item exist in the frequecy map then decrease it by 1\r\n    if(this.frequencyMap[top]) this.frequencyMap[top]--;\r\n\r\n    //if the max value frequency in the listmap is blank then reduce the maxValueFrequency;\r\n    if(this.listMap[this.maxValueFrequency].length === 0) this.maxValueFrequency--;\r\n\r\n    //return the max value frequency with proper order if it is same\r\n    return top;\r\n\r\n};\r\n\r\n//Time O(Log n) // for both Push and Pop\r\n//Space O(n) for storing all the values in the hashMap and listMap"
+  }
+}

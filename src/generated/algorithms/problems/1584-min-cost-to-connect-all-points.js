@@ -1,0 +1,29 @@
+export default {
+  "id": 1584,
+  "name": "Min Cost to Connect All Points",
+  "difficulty": "medium",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/min-cost-to-connect-all-points",
+  "relativeDir": "M/Min Cost to Connect All Points",
+  "slug": "1584-min-cost-to-connect-all-points",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 29,
+    "java": 45,
+    "python": 33,
+    "javascript": 53
+  },
+  "languages": {
+    "cpp": "// Runtime: 2345 ms (Top 8.82%) | Memory: 175.8 MB (Top 19.01%)\r\nclass Solution {\r\npublic:\r\n    int minCostConnectPoints(vector<vector<int>>& points) {\r\n        ios_base::sync_with_stdio(false);\r\n        cin.tie(NULL);\r\n\r\n        int n = points.size();\r\n        priority_queue<vector<int>> q;\r\n        unordered_set<int> vis;\r\n        int ans = 0;\r\n        q.push({0,0,0});\r\n        vector<int> cur;\r\n        while(!q.empty() && vis.size()<n){\r\n            cur = q.top(); q.pop();\r\n            if(vis.count(cur[2]))continue;\r\n            ans += -cur[0];\r\n            vis.insert(cur[2]);\r\n            for(int i=0;i<n;i++){\r\n                if(!vis.count(i)){\r\n                    int d = abs(points[cur[2]][0] - points[i][0]) +\r\n                        abs(points[cur[2]][1] - points[i][1]);\r\n                    q.push({-d,cur[2],i});\r\n                }\r\n            }\r\n        }\r\n        return ans;\r\n    }\r\n};",
+    "python": "# Runtime: 2922 ms (Top 60.17%) | Memory: 79.1 MB (Top 76.18%)\r\nclass Solution:\r\n    def minCostConnectPoints(self, points: List[List[int]]) -> int:\r\n\r\n        cost = 0\r\n        heap = []\r\n\r\n        #set to store past points to prevent cycle\r\n        visited = set([0])\r\n\r\n        #i == the index of current point\r\n        i = 0\r\n\r\n        while len(visited) < len(points):\r\n            #Add all costs from current point to unreached points to min heap\r\n            for j in range(len(points)):\r\n                if j == i or j in visited:\r\n                    continue\r\n                distance = abs(points[i][0] - points[j][0]) + abs(points[i][1] - points[j][1])\r\n                heapq.heappush(heap, (distance, j))\r\n\r\n            #Add new min cost edge\r\n            while True:\r\n                dist, point = heapq.heappop(heap)\r\n                if point not in visited:\r\n                    cost += dist\r\n                    #Add point to visited to prevent cycle\r\n                    visited.add(point)\r\n                    #Update point\r\n                    i = point\r\n                    break\r\n\r\n        return cost",
+    "java": "// Runtime: 15 ms (Top 99.32%) | Memory: 42.90 MB (Top 99.2%)\r\n\r\nclass Solution {\r\n    public int minCostConnectPoints(int[][] points) {\r\n        int len = points.length;\r\n        // array that keep track of the shortest distance from mst to each node\r\n        int[] disArr = new int[len];\r\n        for (int i = 1; i < len; ++i) {\r\n            disArr[i] = Integer.MAX_VALUE;\r\n        }\r\n        // visited[node] == true if node in mst\r\n        boolean[] visited = new boolean[len];\r\n        visited[0] = true;\r\n        \r\n        int numEdge = 0;\r\n        // current node, used to update the disArr\r\n        int cur = 0;\r\n        // result\r\n        int res = 0;\r\n        \r\n        while (numEdge++ < len - 1) {\r\n            int minEdge = Integer.MAX_VALUE;\r\n            int next = -1;\r\n            for (int i = 0; i < len; ++i) {\r\n                // if the node i is not in mst\r\n                if (!visited[i]) {\r\n                    // find the distance between cur and i\r\n                    int dis = Math.abs(points[cur][0] - points[i][0]) + Math.abs(points[cur][1] - points[i][1]);\r\n                    // update distance array\r\n                    disArr[i] = Math.min(dis, disArr[i]);\r\n                    // find the shortest edge\r\n                    if (disArr[i] < minEdge) {\r\n                        minEdge = disArr[i];\r\n                        next = i;\r\n                    }\r\n                }\r\n            }\r\n            cur = next;\r\n            visited[cur] = true;\r\n            res += minEdge;\r\n        }\r\n        \r\n        return res;\r\n    }\r\n}",
+    "javascript": "/**\r\n * @param {number[][]} points\r\n * @return {number}\r\n */\r\n//By Kruskal Approach\r\nlet union_find,mapping_arr,count,maxCost,rank\r\nconst find=(root)=>{\r\n    if(union_find[root]===root)return root;\r\n    return union_find[root]= find(union_find[root]);\r\n}\r\nconst union=([src,dst,d])=>{\r\n    let rootX=find(src);\r\n    let rootY=find(dst);\r\n    if(rootX!=rootY){\r\n        if(rank[rootX]<rank[rootY]){\r\n            union_find[rootX]=rootY;\r\n        }else if(rank[rootX]>rank[rootY]){\r\n            union_find[rootY]=rootX;\r\n        }else{\r\n            union_find[rootY]=rootX;\r\n            rank[rootX]++;\r\n        }\r\n        count--;\r\n        maxCost+=d;\r\n    }\r\n    \r\n    \r\n}\r\nvar minCostConnectPoints = function(points) {\r\n    let edges=[];\r\n    union_find=[];\r\n    rank=[];\r\n    maxCost=0;\r\n    count=points.length;\r\n    for(let i=0;i<points.length;i++){\r\n        union_find[i]=i;\r\n        rank[i]=1\r\n        let src=points[i];\r\n        for(let j=i+1;j<points.length;j++){\r\n            let dst=points[j];\r\n            let d= Math.abs(src[0]-dst[0])+Math.abs(src[1]-dst[1])\r\n            edges.push([i,j,d]);\r\n        }\r\n    }\r\n    edges.sort((a,b)=>a[2]-b[2])\r\n    for(let i=0;i<edges.length;i++){\r\n        if(count>1)\r\n        union(edges[i]);\r\n    }\r\n\r\n    return maxCost;\r\n    \r\n};"
+  }
+}

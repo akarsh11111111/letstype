@@ -1,0 +1,29 @@
+export default {
+  "id": 30,
+  "name": "Substring with Concatenation of All Words",
+  "difficulty": "hard",
+  "premium": false,
+  "topic": "algorithms",
+  "url": "https://leetcode.com/problems/substring-with-concatenation-of-all-words",
+  "relativeDir": "S/Substring with Concatenation of All Words",
+  "slug": "0030-substring-with-concatenation-of-all-words",
+  "availableLanguages": [
+    "cpp",
+    "java",
+    "python",
+    "javascript"
+  ],
+  "defaultLanguage": "cpp",
+  "lineCounts": {
+    "cpp": 35,
+    "java": 61,
+    "python": 26,
+    "javascript": 33
+  },
+  "languages": {
+    "cpp": "// Runtime: 557 ms (Top 57.30%) | Memory: 24.5 MB (Top 81.25%)\r\n\r\nclass Solution {\r\npublic:\r\n    vector<int> findSubstring(string s, vector<string>& words) {\r\n        int n = words[0].length();\r\n        int slen = s.length();\r\n        int len = slen - n*words.size();\r\n        vector<int> ans;\r\n        if( len < 0) return ans;\r\n        string t;\r\n        unordered_map<string, int> mp;\r\n        for(auto i = 0; i < words.size(); ++i) ++mp[words[i]];\r\n\r\n        for(int i = 0; i<= len; ++i){\r\n            t = s.substr(i, n);\r\n            if(mp.find(t) != mp.end()){\r\n                unordered_map<string, int> smp;\r\n                ++smp[t];\r\n                int flag = 1;\r\n                for(int j = i+n, k = 1; k < words.size() && j+n <= slen; ++k, j = j + n){\r\n                    t = s.substr(j, n);\r\n                    if(mp.find(t) != mp.end()) ++smp[t];\r\n                    else {\r\n                        flag = 0;\r\n                        break;\r\n                    }\r\n                }\r\n                if(flag && smp == mp) ans.push_back(i);\r\n            }\r\n        }\r\n\r\n        return ans;\r\n    }\r\n};",
+    "python": "# Runtime: 1522 ms (Top 17.46%) | Memory: 14.2 MB (Top 76.15%)\r\nclass Solution:\r\n    def findSubstring(self, s: str, words: List[str]) -> List[int]:\r\n        req={}\r\n        for i in words:\r\n            req[i]=1+req.get(i,0)\r\n        l=0\r\n        r=len(words)*len(words[0])\r\n        ans=[]\r\n\r\n        while r<len(s)+1:\r\n            i=0\r\n            curr={}\r\n            left, right= l, l+len(words[0])\r\n            while right<l+len(words)*len(words[0])+1:\r\n                x=s[left:right]\r\n                # print(x)\r\n                if x in req.keys():\r\n                    curr[x]= 1+ curr.get(x,0)\r\n                left=right\r\n                right=right+len(words[0])\r\n            if req==curr:\r\n                ans.append(l)\r\n            l=l+1\r\n            r=r+1\r\n        return ans",
+    "java": "// Runtime: 68 ms (Top 73.46%) | Memory: 43.2 MB (Top 88.65%)\r\nclass Solution {\r\n    public List<Integer> findSubstring(String s, String[] words) {\r\n\r\n        HashMap<String, Integer> input = new HashMap<>();\r\n        int ID = 1;\r\n        HashMap<Integer, Integer> count = new HashMap<>();\r\n        for(String word: words) {\r\n            if(!input.containsKey(word))\r\n                input.put(word, ID++);\r\n            int id = input.get(word);\r\n            count.put(id,count.getOrDefault(id,0)+1);\r\n\r\n        }\r\n        int len = s.length();\r\n        int wordLen = words[0].length();\r\n        int numWords = words.length;\r\n        int windowLen = wordLen*numWords;\r\n        int lastIndex = s.length()-windowLen;\r\n\r\n        int curWordId[] = new int[len];\r\n        String cur = \" \"+s.substring(0,wordLen-1);\r\n\r\n        //Change to int array\r\n        for(int i = 0; i< (len-wordLen+1); i++) {\r\n            cur = cur.substring(1, cur.length())+s.charAt(i+wordLen-1);\r\n            if(input.containsKey(cur)){\r\n                curWordId[i] = input.get(cur);\r\n            } else {\r\n                curWordId[i] = -1;\r\n            }\r\n        }\r\n        List<Integer> res = new ArrayList<>();\r\n\r\n        //compare using int make it faster 30 times in each comparison\r\n        for(int i = 0; i<= lastIndex; i++) {\r\n\r\n            HashMap<Integer, Integer> winMap = new HashMap<>();\r\n            for(int j = 0; j < windowLen && curWordId[i] != -1; j+=wordLen) {\r\n\r\n                int candidate = curWordId[j+i];\r\n\r\n                if(!count.containsKey(candidate))\r\n                    break;\r\n                else{\r\n                    winMap.put(candidate, winMap.getOrDefault(candidate, 0)+1);\r\n                }\r\n                if(winMap.get(candidate) > count.get(candidate))\r\n                    break;\r\n\r\n                if(j == (windowLen - wordLen) && winMap.size() == count.size()){\r\n                    res.add(i);\r\n\r\n                }\r\n\r\n            }\r\n        }\r\n\r\n        return res;\r\n    }\r\n}",
+    "javascript": "var findSubstring = function(s, words) {\r\n    \r\n    let res = [];\r\n\r\n    let wordLength = words[0].length;\r\n    let wordCount = words.length;\r\n    let len = wordCount * wordLength; //Length of sliding window\r\n    \r\n    let map = {}\r\n    \r\n    for (let word of words) map[word] = map[word] + 1 || 1; //Hash word freq\r\n\r\n  \tfor (let i = 0; i < s.length - len + 1; i++) {\r\n            let sub = s.slice(i, i + len); //Generate substring of sliding window length\r\n            if (isConcat(sub, map, wordLength)) res.push(i)\r\n        }\r\n    \r\n    return res;\r\n};\r\n\r\nfunction isConcat(sub,map,wordLength){\r\n    \r\n    let seen = {};\r\n    for (let i = 0; i < sub.length; i+=wordLength) {\r\n        let word = sub.slice(i,i + wordLength);\r\n        seen[word] = seen[word] + 1 || 1\r\n    }\r\n    \r\n    for(let key in map){\r\n        if(map[key] !== seen[key]) return false; //Word freq must match between map and seen\r\n    }\r\n    return true;\r\n}```"
+  }
+}
