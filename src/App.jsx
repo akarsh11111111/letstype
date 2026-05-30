@@ -51,6 +51,8 @@ function buildWordText(count, variant) {
 export default function App() {
   const [mode, setMode] = useState('words')
   const [theme, setTheme] = useState(DEFAULT_THEME)
+  const [backgroundMode, setBackgroundMode] = useState('normal')
+  const [backgroundPreset, setBackgroundPreset] = useState('nebula')
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [soundProfile, setSoundProfile] = useState('classic')
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -59,7 +61,7 @@ export default function App() {
   const [codingLanguage, setCodingLanguage] = useState('cpp')
   const [problemListOpen, setProblemListOpen] = useState(false)
   const [problemSearch, setProblemSearch] = useState('')
-  const [wordOption, setWordOption] = useState(50)
+  const [wordOption, setWordOption] = useState(25)
   const [timeOption, setTimeOption] = useState(60)
   const [customText, setCustomText] = useState('')
   const [testText, setTestText] = useState('')
@@ -69,7 +71,7 @@ export default function App() {
   const [finished, setFinished] = useState(false)
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [recentResults, setRecentResults] = useState([])
-  const [includePunctuation, setIncludePunctuation] = useState(true)
+  const [includePunctuation, setIncludePunctuation] = useState(false)
   const [includeNumbers, setIncludeNumbers] = useState(false)
   const [shareToast, setShareToast] = useState('')
   const lastSavedIdRef = useRef('')
@@ -97,6 +99,8 @@ export default function App() {
       if (saved) {
         const parsed = JSON.parse(saved)
         if (parsed.theme && PREMIUM_THEMES[parsed.theme]) setTheme(parsed.theme)
+        if (parsed.backgroundMode === 'premium') setBackgroundMode('premium')
+        if (parsed.backgroundPreset) setBackgroundPreset(parsed.backgroundPreset)
         if (typeof parsed.soundEnabled === 'boolean') setSoundEnabled(parsed.soundEnabled)
         if (parsed.soundProfile) setSoundProfile(parsed.soundProfile)
       }
@@ -107,8 +111,10 @@ export default function App() {
 
   useEffect(() => {
     document.body.dataset.theme = theme
-    window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ theme, soundEnabled, soundProfile }))
-  }, [soundEnabled, soundProfile, theme])
+    document.body.dataset.bgMode = backgroundMode
+    document.body.dataset.bg = backgroundPreset
+    window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ theme, backgroundMode, backgroundPreset, soundEnabled, soundProfile }))
+  }, [backgroundMode, backgroundPreset, soundEnabled, soundProfile, theme])
 
   useEffect(() => {
     typingSoundRef.current = createTypingSound()
@@ -224,15 +230,19 @@ export default function App() {
       // special-case coding: extract a leading comment/header line to display but not require typing
       if (!preserveText && mode === 'coding' && codingProblemData) {
         const raw = codingProblemData.languages?.[codingLanguage] || codingProblemData.languages?.[codingProblemData.defaultLanguage] || ''
-        const lines = raw.split('\n')
+        const normalizedRaw = raw.replace(/\r\n?/g, '\n')
+        const lines = normalizedRaw.split('\n')
         let header = ''
-        let body = raw
+        let body = normalizedRaw
         if (lines.length > 0) {
           const first = lines[0].trim()
           if (first.startsWith('//') || first.startsWith('/*') || first.startsWith('#')) {
             header = lines[0]
             body = lines.slice(1).join('\n')
           }
+        }
+        while (body.startsWith('\n')) {
+          body = body.slice(1)
         }
         setCodingHeader(header)
         setTestText(body)
@@ -629,6 +639,10 @@ export default function App() {
         onClose={() => setSettingsOpen(false)}
         theme={theme}
         onThemeChange={setTheme}
+        backgroundMode={backgroundMode}
+        onBackgroundModeChange={setBackgroundMode}
+        backgroundPreset={backgroundPreset}
+        onBackgroundPresetChange={setBackgroundPreset}
         soundEnabled={soundEnabled}
         onSoundEnabledChange={setSoundEnabled}
         soundProfile={soundProfile}

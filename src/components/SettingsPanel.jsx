@@ -9,11 +9,36 @@ const SOUND_PRESETS = [
   { id: 'red', label: 'Red' }
 ]
 
+const BACKGROUND_PRESETS = [
+  {
+    id: 'nebula',
+    label: 'Nebula Bloom',
+    description: 'soft layered aurora lights with cinematic motion',
+    accent: '#8fe6ff'
+  },
+  {
+    id: 'electric',
+    label: 'Electric Pulse',
+    description: 'sharp neon streaks and high-contrast glow',
+    accent: '#7cf7ff'
+  },
+  {
+    id: 'luxe',
+    label: 'Luxe Orbit',
+    description: 'golden premium halo with deep shadow depth',
+    accent: '#f5c46b'
+  }
+]
+
 export default function SettingsPanel({
   open,
   onClose,
   theme,
   onThemeChange,
+  backgroundMode,
+  onBackgroundModeChange,
+  backgroundPreset,
+  onBackgroundPresetChange,
   soundEnabled,
   onSoundEnabledChange,
   soundProfile,
@@ -69,6 +94,42 @@ export default function SettingsPanel({
               <button type="button" className="settings-link" onClick={onResetTheme}>
                 reset to default premium look
               </button>
+            </section>
+
+            <section className="settings-section">
+              <div className="section-label">Background</div>
+              <div className="background-toggle">
+                <button
+                  type="button"
+                  className={`background-chip ${backgroundMode === 'normal' ? 'active' : ''}`}
+                  onClick={() => onBackgroundModeChange('normal')}
+                >
+                  normal
+                </button>
+                <button
+                  type="button"
+                  className={`background-chip ${backgroundMode === 'premium' ? 'active' : ''}`}
+                  onClick={() => onBackgroundModeChange('premium')}
+                >
+                  premium
+                </button>
+              </div>
+              {backgroundMode === 'premium' ? (
+                <div className="background-grid">
+                  {BACKGROUND_PRESETS.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={`background-card ${backgroundPreset === item.id ? 'active' : ''}`}
+                      onClick={() => onBackgroundPresetChange(item.id)}
+                    >
+                      <span className="background-dot" style={{ background: item.accent }} />
+                      <span className="background-name">{item.label}</span>
+                      <span className="background-desc">{item.description}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </section>
 
             <section className="settings-section">

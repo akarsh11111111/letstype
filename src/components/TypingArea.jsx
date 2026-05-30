@@ -17,6 +17,9 @@ export default function TypingArea({
   stats
 }) {
   const inputRef = useRef(null)
+  const wordsRef = useRef(null)
+  const codeEditorRef = useRef(null)
+  const scrollAnimationRef = useRef(0)
   const currentLineRef = useRef(null)
   const progress =
     mode === 'words'
@@ -82,6 +85,69 @@ export default function TypingArea({
     return typed[index] !== testText[index] ? index : -1
   }, [testText, typed])
 
+  const smoothScrollContainer = (container, target, align = 'center') => {
+    if (!container || !target) {
+      return
+    }
+
+    const containerRect = container.getBoundingClientRect()
+    const targetRect = target.getBoundingClientRect()
+    const currentTop = container.scrollTop
+    const containerHeight = container.clientHeight
+    const targetOffsetTop = target.offsetTop
+    const targetHeight = target.offsetHeight
+
+    let desiredTop = currentTop
+
+    if (align === 'start') {
+      desiredTop = targetOffsetTop - 24
+    } else if (align === 'end') {
+      desiredTop = targetOffsetTop - containerHeight + targetHeight + 24
+    } else {
+      desiredTop = targetOffsetTop - containerHeight / 2 + targetHeight / 2
+    }
+
+    const visibleTop = currentTop + 24
+    const visibleBottom = currentTop + containerHeight - 24
+    const targetTop = targetRect.top - containerRect.top + currentTop
+    const targetBottom = targetTop + targetHeight
+
+    if (targetTop >= visibleTop && targetBottom <= visibleBottom) {
+      return
+    }
+
+    const maxScroll = Math.max(0, container.scrollHeight - containerHeight)
+    const clampedTarget = Math.max(0, Math.min(maxScroll, desiredTop))
+    const start = container.scrollTop
+    const delta = clampedTarget - start
+
+    if (Math.abs(delta) < 1) {
+      return
+    }
+
+    const duration = Math.min(320, Math.max(160, Math.abs(delta) * 0.35))
+    const startTime = performance.now()
+
+    if (scrollAnimationRef.current) {
+      cancelAnimationFrame(scrollAnimationRef.current)
+    }
+
+    const tick = (now) => {
+      const elapsed = now - startTime
+      const progress = Math.min(1, elapsed / duration)
+      const eased = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2
+      container.scrollTop = start + delta * eased
+
+      if (progress < 1) {
+        scrollAnimationRef.current = requestAnimationFrame(tick)
+      } else {
+        scrollAnimationRef.current = 0
+      }
+    }
+
+    scrollAnimationRef.current = requestAnimationFrame(tick)
+  }
+
   const handleCodingKeyDown = (event) => {
     if (event.key !== 'Tab') {
       return
@@ -91,7 +157,20 @@ export default function TypingArea({
     const target = event.currentTarget
     const start = target.selectionStart ?? typed.length
     const end = target.selectionEnd ?? typed.length
-    const nextValue = `${typed.slice(0, start)}\t${typed.slice(end)}`
+    const lineStart = testText.lastIndexOf('\n', Math.max(0, start - 1)) + 1
+    const nextLineBreak = testText.indexOf('\n', lineStart)
+    const lineEnd = nextLineBreak === -1 ? testText.length : nextLineBreak
+    const lineText = testText.slice(lineStart, lineEnd)
+    const firstNonWhitespaceOffset = lineText.search(/\S/)
+
+    let indentChunk = '\t'
+    if (firstNonWhitespaceOffset > 0 && start >= lineStart && start <= lineStart + firstNonWhitespaceOffset) {
+      const indentEnd = lineStart + firstNonWhitespaceOffset
+      const from = Math.min(start, indentEnd)
+      indentChunk = testText.slice(from, indentEnd) || '\t'
+    }
+
+    const nextValue = `${typed.slice(0, start)}${indentChunk}${typed.slice(end)}`
     onType(nextValue)
   }
 
@@ -100,10 +179,23 @@ export default function TypingArea({
   }, [testText])
 
   useEffect(() => {
-    if (mode !== 'coding' || currentLineIndex < 0) {
+    if (mode === 'coding') {
+      if (currentLineIndex < 0) {
+        return
+      }
+      const activeLine = currentLineRef.current
+      if (!activeLine) {
+        return
+      }
+      smoothScrollContainer(codeEditorRef.current, activeLine, 'center')
       return
     }
-    currentLineRef.current?.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' })
+
+    const activeChar = wordsRef.current?.querySelector('.char.current')
+    if (!activeChar) {
+      return
+    }
+    smoothScrollContainer(wordsRef.current, activeChar, 'center')
   }, [currentLineIndex, mode, typed.length])
 
   // flash current line briefly when a new problem is loaded
@@ -196,21 +288,26 @@ export default function TypingArea({
           {codingProblemLoading ? (
             <div className="code-loading">loading problem data...</div>
           ) : (
-            <div className="code-editor" role="presentation" aria-hidden>
+            <div className="code-editor" ref={codeEditorRef} role="presentation" aria-hidden>
               {lineData.map((line) => {
                 const isActive = line.index === currentLineIndex
                 const isPast = line.index < currentLineIndex
                 const isLiveError = isActive && liveErrorIndex >= line.start && liveErrorIndex <= line.end
+                const isCompleted = typedLength > line.end || (finished && typedLength >= line.end)
+                const isCleanLine = isCompleted && line.wrong === 0 && line.typedCount >= line.text.length
+                const hasLineError = isCompleted && line.wrong > 0
 
                 return (
                   <motion.div
                     key={`${codingProblem?.id ?? 'problem'}-${line.index}`}
-                    className={`code-line ${isActive ? 'active' : ''} ${isPast ? 'past' : ''} ${line.wrong > 0 ? 'has-errors' : ''} ${isLiveError ? 'shake-line' : ''}`}
+                    className={`code-line ${isActive ? 'active' : ''} ${isPast ? 'past' : ''} ${hasLineError ? 'has-errors' : ''} ${isLiveError ? 'shake-line' : ''}`}
                     ref={isActive ? currentLineRef : null}
                     layout
                     transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                   >
-                    <span className="code-line-number">{String(line.index + 1).padStart(2, '0')}</span>
+                    <span className={`code-line-number ${isCleanLine ? 'done' : ''} ${hasLineError ? 'error' : ''}`}>
+                      {String(line.index + 1).padStart(2, '0')}
+                    </span>
                     <span className="code-line-text">
                       {line.text.length === 0 ? (
                         <span className="code-empty-line">&nbsp;</span>
@@ -258,7 +355,7 @@ export default function TypingArea({
           )}
         </>
       ) : (
-        <div className={`words ${liveErrorIndex >= 0 ? 'shake-line' : ''}`} role="presentation" aria-hidden>
+        <div ref={wordsRef} className={`words ${liveErrorIndex >= 0 ? 'shake-line' : ''}`} role="presentation" aria-hidden>
           {testText.split('').map((char, idx) => {
             let className = 'char'
             if (idx < typedLength) {
