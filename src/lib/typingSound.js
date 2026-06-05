@@ -5,6 +5,9 @@ const PROFILES = {
   red: { base: 760, click: 11, wobble: 14, decay: 0.032, gain: 0.018, noise: 0.012, body: 0.016 }
 }
 
+// A softer, more soothing profile for celebrations and chimes
+PROFILES.soothing = { base: 640, click: 8, wobble: 10, decay: 0.06, gain: 0.012, noise: 0.008, body: 0.01 }
+
 function createNoiseBuffer(audioContext, duration = 0.03) {
   const sampleRate = audioContext.sampleRate
   const frameCount = Math.floor(sampleRate * duration)
@@ -34,6 +37,8 @@ export function createTypingSound() {
   const play = async (profileName = 'classic', options = {}) => {
     const preset = PROFILES[profileName] || PROFILES.classic
     const kind = options.kind || 'tap'
+    // default playback volume is reduced to be less intrusive; callers may pass volumeMul to scale
+    const volumeMul = typeof options.volumeMul === 'number' ? options.volumeMul : 0.6
     const ctx = await ensureContext()
 
     const now = ctx.currentTime
@@ -65,14 +70,16 @@ export function createTypingSound() {
     filter.frequency.setValueAtTime(preset.base * 1.8, now)
     filter.Q.setValueAtTime(kind === 'space' ? 3 : 6, now)
 
+    // apply optional volume multiplier so celebration sounds can be louder
+    const appliedGain = (kind === 'space' ? preset.gain * 1.25 : preset.gain) * volumeMul
     gain.gain.setValueAtTime(0.0001, now)
-    gain.gain.exponentialRampToValueAtTime(kind === 'space' ? preset.gain * 1.25 : preset.gain, now + attack)
+    gain.gain.exponentialRampToValueAtTime(appliedGain, now + attack)
     gain.gain.exponentialRampToValueAtTime(0.0001, now + preset.decay + durationBoost)
 
     noise.buffer = noiseBuffer || createNoiseBuffer(ctx)
-    noiseGain.gain.value = preset.noise + (kind === 'delete' ? 0.01 : 0)
+    noiseGain.gain.value = (preset.noise + (kind === 'delete' ? 0.01 : 0)) * volumeMul
     const bodyGain = ctx.createGain()
-    bodyGain.gain.value = preset.body
+    bodyGain.gain.value = preset.body * volumeMul
 
     click.connect(filter)
     wobble.connect(filter)
@@ -93,5 +100,34 @@ export function createTypingSound() {
     noise.stop(now + preset.decay + durationBoost)
   }
 
-  return { play, close: () => audioContext?.close() }
+  const playChime = async (opts = {}) => {
+    const ctx = await ensureContext()
+    const now = ctx.currentTime
+    const gain = ctx.createGain()
+    const osc1 = ctx.createOscillator()
+    const osc2 = ctx.createOscillator()
+    const duration = typeof opts.duration === 'number' ? opts.duration : 0.28
+    const volumeMul = typeof opts.volumeMul === 'number' ? opts.volumeMul : 0.8
+
+    osc1.type = 'sine'
+    osc2.type = 'triangle'
+    const base = opts.base || 880
+    osc1.frequency.setValueAtTime(base, now)
+    osc2.frequency.setValueAtTime(base * 1.5, now)
+
+    gain.gain.setValueAtTime(0.0001, now)
+    gain.gain.exponentialRampToValueAtTime(0.06 * volumeMul, now + 0.01)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration)
+
+    osc1.connect(gain)
+    osc2.connect(gain)
+    gain.connect(ctx.destination)
+
+    osc1.start(now)
+    osc2.start(now)
+    osc1.stop(now + duration)
+    osc2.stop(now + duration)
+  }
+
+  return { play, playChime, close: () => audioContext?.close() }
 }

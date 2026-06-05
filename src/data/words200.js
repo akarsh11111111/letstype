@@ -1,0 +1,32 @@
+export const WORDS_200 = [
+  "never","first","learn","state","develop","into","three","logic","public","every",
+  "being","house","think","hooks","system","right","build","study","other","practice",
+  "code","render","event","sample","input","output","simple","random","method","target",
+  "change","person","people","create","follow","search","result","list","string","number",
+  "line","page","group","chart","lesson","concept","module","option","select","action",
+  "update","fetch","center","border","style","color","layout","grid","stack","label",
+  "value","include","remove","handle","trigger","format","resize","scroll","focus","cursor",
+  "submit","cancel","accept","reject","respond","explain","adjust","measure","adapt","explore",
+  "compare","relate","combine","describe","analyze","compute","arrange","convert","inspect","detect",
+  "manage","ensure","verify","design","maintain","optimize","deploy","merge","split","sync",
+  "apple","brisk","canyon","deliver","embrace","flourish","galaxy","honest","illuminate","journey",
+  "keen","lantern","melody","nourish","optimistic","puzzle","quiver","radiant","swift","tumble",
+  "vivid","wander","xenial","yearn","zephyr","agile","buoyant","crest","delve","earnest",
+  "fleet","glimmer","harvest","intricate","jubilant","kinship","lucid","muster","novel","opulent",
+  "pristine","quest","resolve","shimmer","tranquil","unveil","wanderlust","xenon","yield","zeal",
+  "ascend","benevolent","candid","dazzling","embark","fertile","gracious","harbor","ignite","jubilance",
+  "kinetic","luminous","manifesto","nocturnal","ornate","peruse","quaintly","robust","serendipity","tenacious",
+  "uncanny","valiant","wistful","zeppelin","abacus","beacon","cascade","drift","empathy","frugal",
+  "garrison","horizon","immerse","jovial","keystone","labyrinth","medley","nuance","octave","paradox",
+  "quell","respite","sequoia","threshold","unison","vanguard","wanderer","xylem","yonder","zealot",
+  "articulate","boulevard","compile","dexterous","elated","frisson","glacial","helix","integrity","jaunty",
+  "knack","luminary","maverick","nexus","oblivion","pivotal","quench","relic","scintillate","topology",
+  "umpire","vantage","wreathe","xeric","yearbook","zany","acumen","bristle","cortical","diorama",
+  "ethos","filament","gradient","hubris","incidence","jigsaw","kernel","lexicon","montage","nomad",
+  "orator","panacea","quixotic","rhetoric","symphony","tether","umbrage","variegated","whittle","xenolith",
+  "yawn","zestiness","alloy","bastion","cadence","drape","enclave","furlong","galvanize","halcyon",
+  "iconic","jostle","kaleidoscope","largesse","microcosm","nebulous","opal","peninsula","quarry","resplendent",
+  "sundry","turbid","ubiquitous","verdant"
+]
+
+export default WORDS_200

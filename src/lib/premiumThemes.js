@@ -109,4 +109,4 @@ export const PREMIUM_THEMES = {
   }
 }
 
-export const DEFAULT_THEME = 'gold'
+export const DEFAULT_THEME = 'obsidian'

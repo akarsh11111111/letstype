@@ -7,6 +7,9 @@ import { ALGORITHMS_PROBLEMS } from './generated/algorithms'
 import { DEFAULT_THEME, PREMIUM_THEMES } from './lib/premiumThemes'
 import { createTypingSound } from './lib/typingSound'
 
+import { WORDS_100 } from './data/words100'
+import { WORDS_200 } from './data/words200'
+
 const WORD_BANK = [
   'into', 'public', 'system', 'develop', 'problem', 'through', 'school', 'might', 'other', 'about', 'place', 'small', 'great', 'sound', 'house', 'again', 'world', 'change', 'study', 'found',
   'point', 'group', 'while', 'begin', 'every', 'right', 'think', 'three', 'state', 'still', 'never', 'under', 'water', 'thing', 'after', 'write', 'where', 'those', 'being', 'build', 'first',
@@ -31,7 +34,38 @@ function randomFrom(list) {
 
 function buildWordText(count, variant) {
   const punctuation = [',', '.', ';', ':', '!', '?']
+  // If we've got a dedicated word list for the requested count, sample without replacement
   const words = []
+  let sourceList = null
+  if (count === 100) sourceList = WORDS_100
+  else if (count === 200) sourceList = WORDS_200
+
+  if (sourceList) {
+    // shuffle a copy and take the first `count` items to avoid repeats
+    const copy = sourceList.slice()
+    for (let i = copy.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1))
+      const tmp = copy[i]
+      copy[i] = copy[j]
+      copy[j] = tmp
+    }
+    const take = copy.slice(0, Math.min(count, copy.length))
+    for (let i = 0; i < take.length; i += 1) {
+      let value = take[i]
+      if ((variant === 'numbers' || variant === 'both') && i % 4 === 0) {
+        value = `${Math.floor(10 + Math.random() * 89)}`
+      }
+      if ((variant === 'punctuation' || variant === 'both') && i % 5 === 0) {
+        value = `${value}${randomFrom(punctuation)}`
+      }
+      if ((variant === 'numbers' || variant === 'both') && i % 6 === 0) {
+        value = `${value}${Math.floor(Math.random() * 10)}`
+      }
+      words.push(value)
+    }
+    return words.join(' ')
+  }
+
   for (let i = 0; i < count; i += 1) {
     let value = randomFrom(WORD_BANK)
     if ((variant === 'numbers' || variant === 'both') && i % 4 === 0) {
@@ -53,7 +87,8 @@ export default function App() {
   const [theme, setTheme] = useState(DEFAULT_THEME)
   const [backgroundMode, setBackgroundMode] = useState('normal')
   const [backgroundPreset, setBackgroundPreset] = useState('nebula')
-  const [soundEnabled, setSoundEnabled] = useState(true)
+  // default audio OFF as requested; user can enable in settings
+  const [soundEnabled, setSoundEnabled] = useState(false)
   const [soundProfile, setSoundProfile] = useState('classic')
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [codingProblemIndex, setCodingProblemIndex] = useState(0)
@@ -74,10 +109,14 @@ export default function App() {
   const [includePunctuation, setIncludePunctuation] = useState(false)
   const [includeNumbers, setIncludeNumbers] = useState(false)
   const [shareToast, setShareToast] = useState('')
+  const [streak, setStreak] = useState(0)
   const lastSavedIdRef = useRef('')
   const startStampRef = useRef(0)
   const typingSoundRef = useRef(null)
   const celebratedMilestonesRef = useRef(new Set())
+  const celebratedWordsRef = useRef(new Set())
+  const celebratedStagesRef = useRef(new Set())
+  const streakRef = useRef(null)
   const codingProblemMeta = ALGORITHMS_PROBLEMS[codingProblemIndex] || ALGORITHMS_PROBLEMS[0]
   const filteredProblems = useMemo(() => {
     const query = problemSearch.trim().toLowerCase()
@@ -258,6 +297,8 @@ export default function App() {
       setShareToast('')
       startStampRef.current = 0
       celebratedMilestonesRef.current = new Set()
+      celebratedWordsRef.current = new Set()
+      celebratedStagesRef.current = new Set()
     },
     [generateText, codingProblemData, codingLanguage, mode]
   )
@@ -353,14 +394,19 @@ export default function App() {
   }, [mode, resetTest, finished, settingsOpen, typed])
 
   const handleType = (nextValue) => {
-    if (finished) {
-      return
-    }
+    if (finished) return
 
     const previousLength = typed.length
+
+    // start-of-typing celebration (one-time)
     if (!started && nextValue.length > 0) {
       setStarted(true)
       startStampRef.current = Date.now()
+      if (!celebratedStagesRef.current.has('start')) {
+        celebratedStagesRef.current.add('start')
+        confetti({ particleCount: 64, spread: 100, startVelocity: 42, origin: { y: 0.72 }, colors: [PREMIUM_THEMES[theme].vars['--accent'], '#ffffff'] })
+        if (soundEnabled) typingSoundRef.current?.playChime?.({ volumeMul: 1.05, base: 680 })
+      }
     }
 
     if (soundEnabled) {
@@ -381,11 +427,72 @@ export default function App() {
     const clamped = nextValue.slice(0, activeText.length)
     setTyped(clamped)
 
+    // stage celebrations while typing (mid-progress)
+    try {
+      if (activeText.length > 0) {
+        const progress = clamped.length / activeText.length
+        if (progress >= 0.4 && !celebratedStagesRef.current.has('mid1')) {
+          celebratedStagesRef.current.add('mid1')
+          confetti({ particleCount: 48, spread: 72, startVelocity: 36, origin: { y: 0.72 }, colors: [PREMIUM_THEMES[theme].vars['--accent'], PREMIUM_THEMES[theme].vars['--correct']] })
+          if (soundEnabled) typingSoundRef.current?.playChime?.({ volumeMul: 0.95, base: 760 })
+        }
+        if (progress >= 0.7 && !celebratedStagesRef.current.has('mid2')) {
+          celebratedStagesRef.current.add('mid2')
+          confetti({ particleCount: 64, spread: 88, startVelocity: 40, origin: { y: 0.72 }, colors: [PREMIUM_THEMES[theme].vars['--accent'], '#ffffff', PREMIUM_THEMES[theme].vars['--correct']] })
+          if (soundEnabled) typingSoundRef.current?.playChime?.({ volumeMul: 1.05, base: 820 })
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    // Word-complete celebration: when user types a space (finishes a word)
+    if (clamped.length > 0) {
+      const lastChar = clamped[clamped.length - 1]
+      if (lastChar === ' ' || lastChar === '\n' || /[.,;:!?]/.test(lastChar)) {
+        // Trim trailing whitespace to get the completed word
+        const trimmed = clamped.replace(/\s+$/g, '')
+        const lastSpace = trimmed.lastIndexOf(' ')
+        const completedTypedWord = trimmed.slice(lastSpace + 1)
+
+        // Get expected word from testText at same position
+        const expectedPrefix = testText.slice(0, trimmed.length)
+        const expectedLastSpace = expectedPrefix.lastIndexOf(' ')
+        const expectedWord = expectedPrefix.slice(expectedLastSpace + 1)
+
+        const wordKey = trimmed.length // unique by end index
+        if (completedTypedWord) {
+          if (completedTypedWord === expectedWord && !celebratedWordsRef.current.has(wordKey)) {
+            celebratedWordsRef.current.add(wordKey)
+            // Small confetti for per-word completion
+            confetti({ particleCount: 24, spread: 45, startVelocity: 28, origin: { y: 0.7 }, colors: [PREMIUM_THEMES[theme].vars['--accent'], '#ffffff', PREMIUM_THEMES[theme].vars['--correct']] })
+            // increment streak and show a brief toast with the completed word; play chime
+            setStreak((s) => s + 1)
+            setShareToast(`${completedTypedWord} ✓`)
+            if (soundEnabled) typingSoundRef.current?.playChime?.({ volumeMul: 0.8, base: 720 })
+            window.setTimeout(() => setShareToast(''), 1200)
+          } else if (completedTypedWord !== expectedWord) {
+            // wrong word: reset streak and play a subtle negative sound
+            setStreak(0)
+              if (soundEnabled) typingSoundRef.current?.play?.(soundProfile, { kind: 'delete', volumeMul: 0.6 })
+          }
+        }
+      }
+    }
+
+    // finish-of-test celebration
     if (clamped.length >= activeText.length) {
       setFinished(true)
       setStarted(false)
       if (startStampRef.current > 0) {
         setElapsedSeconds(Math.max(1, Math.round((Date.now() - startStampRef.current) / 1000)))
+      }
+      if (!celebratedStagesRef.current.has('end')) {
+        celebratedStagesRef.current.add('end')
+        confetti({ particleCount: 140, spread: 120, startVelocity: 48, origin: { y: 0.66 }, colors: [PREMIUM_THEMES[theme].vars['--accent'], '#ffffff', PREMIUM_THEMES[theme].vars['--correct']] })
+        setShareToast('Completed ✓')
+        if (soundEnabled) typingSoundRef.current?.playChime?.({ volumeMul: 1.3, base: 740 })
+        window.setTimeout(() => setShareToast(''), 1600)
       }
     }
   }
@@ -430,6 +537,14 @@ export default function App() {
   useEffect(() => {
     flashMilestone(Math.round(stats.wpm))
   }, [flashMilestone, stats.wpm])
+
+  useEffect(() => {
+    const el = streakRef.current
+    if (!el) return
+    el.classList.add('animate')
+    const t = window.setTimeout(() => el.classList.remove('animate'), 800)
+    return () => window.clearTimeout(t)
+  }, [streak])
 
   useEffect(() => {
     if (!finished || typed.length === 0) {
@@ -495,6 +610,10 @@ export default function App() {
             <div className="title">LetsType</div>
             <div className="byline">Akarsh</div>
           </div>
+        </div>
+        <div ref={streakRef} className="streak-badge" title="current correct-word streak">
+          <div className="streak-count">{streak}</div>
+          <div className="streak-label">streak</div>
         </div>
         <div className="controls">
           <button type="button" className="settings-icon premium-settings" onClick={() => setSettingsOpen(true)} title="open premium studio">

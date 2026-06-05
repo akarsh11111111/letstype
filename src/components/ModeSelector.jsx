@@ -109,7 +109,7 @@ export default function ModeSelector({
           </div>
         ) : mode === 'words' ? (
           <div className="durations">
-            {[10, 25, 50, 100].map((option) => (
+            {[10, 25, 50, 100, 200].map((option) => (
               <button
                 key={option}
                 className={`dur ${option === wordOption ? 'active' : ''}`}
